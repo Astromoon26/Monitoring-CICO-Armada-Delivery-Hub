@@ -719,7 +719,6 @@ function renderAll() {
       <td>${has?fdur(r.coDelta,true):'<span style="color:var(--muted)">—</span>'}</td>
     </tr>`;
   }).join(''):`<tr><td colspan="12"><div class="empty">Belum ada armada yang selesai loading</div></td></tr>`;
-}
 
   // PANEL 5: BELUM DATANG
   const p5 = data.filter(r=>!r.checkin);
