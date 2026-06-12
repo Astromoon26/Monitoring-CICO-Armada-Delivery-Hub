@@ -717,7 +717,7 @@
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Req Stuffing</th><th>Check In Aktual</th><th>Selisih</th><th>Status</th>
+          <th>Req Stuffing</th><th>Target Jam Check In</th><th>Check In Aktual</th><th>Selisih</th><th>Status</th>
         </tr></thead>
         <tbody id="t1"></tbody>
       </table></div>
@@ -729,7 +729,7 @@
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Check In</th><th>Durasi Tunggu</th><th>Status</th>
+          <th>Req Stuffing</th><th>Check In</th><th>Durasi Tunggu</th><th>Status</th>
         </tr></thead>
         <tbody id="t2"></tbody>
       </table></div>
@@ -741,7 +741,7 @@
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Open</th><th>Durasi Loading</th><th>Status</th>
+          <th>Req Stuffing</th><th>Open</th><th>Durasi Loading</th><th>Status</th>
         </tr></thead>
         <tbody id="t3"></tbody>
       </table></div>
@@ -753,7 +753,7 @@
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Open</th><th>Close</th><th>Check Out</th><th>Target CO</th>
+          <th>Req Stuffing</th><th>Open</th><th>Close</th><th>Check Out</th><th>Target CO</th>
           <th>Durasi Loading</th><th>Status CO</th><th>Selisih</th>
         </tr></thead>
         <tbody id="t4"></tbody>
@@ -1086,7 +1086,7 @@ function renderKPI(data) {
   const map = {};
   data.forEach(r => {
     const k = r.tujuan || '(Tidak Diketahui)';
-    if (!map[k]) map[k] = { ciHit:0, ciMiss:0, ciNA:0, coHit:0, coMiss:0, coNA:0 };
+    if (!map[k]) map[k] = { ciHit:0, ciMiss:0, ciNA:0, coHit:0, coMiss:0, coNA:0, tciCount:{}, tcoCount:{} };
     const m = map[k];
     if (r.checkin) {
       if (r.tci) { r.ciDelta<=0 ? m.ciHit++ : m.ciMiss++; } else m.ciNA++;
@@ -1094,7 +1094,23 @@ function renderKPI(data) {
     if (r.checkout) {
       if (r.tco) { r.coDelta<=0 ? m.coHit++ : m.coMiss++; } else m.coNA++;
     }
+    // collect target time strings (mode per tujuan)
+    if (r.tci) {
+      const key = ft(r.tci);
+      m.tciCount[key] = (m.tciCount[key]||0) + 1;
+    }
+    if (r.tco) {
+      const key = ft(r.tco);
+      m.tcoCount[key] = (m.tcoCount[key]||0) + 1;
+    }
   });
+
+  // helper: pick most frequent target time
+  const modeOf = (obj) => {
+    const keys = Object.keys(obj);
+    if (!keys.length) return null;
+    return keys.sort((a,b)=>obj[b]-obj[a])[0];
+  };
 
   const keys = Object.keys(map).sort();
   const grid = document.getElementById('kpiGrid');
@@ -1123,19 +1139,27 @@ function renderKPI(data) {
       return `<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--hit-text)">${hit}</span><span style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--border2)"> / </span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--miss-text)">${miss}</span>`;
     };
 
+    // target jam pill — small, with bullseye marker, no "target" text
+    const targetPill = (jam) => {
+      if (!jam) return '';
+      return `<span title="Target" style="display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-bg);border:1px dashed var(--load-border);padding:1px 5px;border-radius:4px;line-height:1.2">◎ ${jam}</span>`;
+    };
+    const tciJam = modeOf(m.tciCount);
+    const tcoJam = modeOf(m.tcoCount);
+
     const safeD = dest.replace(/'/g,"\\'");
     return `<div class="kpi-card ${cls}${isSelected?' kpi-selected':''}" onclick="toggleTujuanFilter('${safeD}')" title="Klik untuk filter tujuan: ${dest}">
       <div class="kpi-dest" title="${dest}">${isSelected?'✓ ':''}<strong>${dest}</strong></div>
       <div class="kpi-rows">
         <div class="kpi-row">
-          <span class="kpi-row-label">Check In</span>
+          <span class="kpi-row-label" style="display:inline-flex;align-items:center;gap:5px">Check In ${targetPill(tciJam)}</span>
           <div style="display:flex;align-items:center;gap:8px">
             ${scoreHtml(m.ciHit, m.ciMiss, ciTotal)}
             ${ratePct(ciRate)}
           </div>
         </div>
         <div class="kpi-row">
-          <span class="kpi-row-label">Check Out</span>
+          <span class="kpi-row-label" style="display:inline-flex;align-items:center;gap:5px">Check Out ${targetPill(tcoJam)}</span>
           <div style="display:flex;align-items:center;gap:8px">
             ${scoreHtml(m.coHit, m.coMiss, coTotal)}
             ${ratePct(coRate)}
@@ -1182,7 +1206,26 @@ function renderAll() {
 
   updateSummaryCardUI();
   updateTujuanChips();
-  renderKPI(data);
+
+  // KPI per tujuan: jangan disaring oleh selectedTujuan,
+  // supaya semua kartu tetap terlihat saat multi-pilih.
+  const kpiData = (function(){
+    let d = baseFiltered();
+    if (selectedSummaryCards.size > 0) {
+      d = d.filter(r => {
+        for (const key of selectedSummaryCards) {
+          if (key === 'ontime'   && r.checkin && r.stuffing && r.checkin <= r.stuffing) return true;
+          if (key === 'wait'     && r.checkin && !r.open) return true;
+          if (key === 'loading'  && r.open && !r.close) return true;
+          if (key === 'checkout' && r.checkout) return true;
+          if (key === 'belum'    && !r.checkin) return true;
+        }
+        return false;
+      });
+    }
+    return d;
+  })();
+  renderKPI(kpiData);
 
   // Helper: vendor cell with name + type badge
   const vcell = (r) => `${r.vendor} ${vendorTypeBadge(r.vendor)}`;
@@ -1205,6 +1248,7 @@ function renderAll() {
       <td>${typeArmadaCell(r.typeArmada)}</td>
       <td>${r.site}</td><td>${r.tujuan}</td>
       <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
+      <td><span class="tval">${r.tciStr||'—'}</span></td>
       <td><span class="tval">${ft(r.checkin)}</span></td>
       <td>${stuffDelta!==null?fdur(stuffDelta,true):'<span style="color:var(--muted)">—</span>'}</td>
       <td>${statusBadge}</td>
@@ -1222,6 +1266,7 @@ function renderAll() {
       <td><span class="nopol">${r.nopol}</span></td>
       <td>${typeArmadaCell(r.typeArmada)}</td>
       <td>${r.site}</td><td>${r.tujuan}</td>
+      <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
       <td><span class="tval">${ft(r.checkin)}</span></td>
       <td><span class="dur" style="color:${long?'var(--miss-text)':'var(--warn-text)'}">${fdurRaw(wms)}</span></td>
       <td><span class="badge b-wait"><span class="dot d-warn"></span>MENUNGGU</span></td>
@@ -1239,6 +1284,7 @@ function renderAll() {
       <td><span class="nopol">${r.nopol}</span></td>
       <td>${typeArmadaCell(r.typeArmada)}</td>
       <td>${r.site}</td><td>${r.tujuan}</td>
+      <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
       <td><span class="tval">${ft(r.open)}</span></td>
       <td><span class="dur" style="color:var(--load-text)">${fdurRaw(lms)}</span></td>
       <td><span class="badge b-load"><span class="dot d-blue"></span>LOADING</span></td>
@@ -1256,6 +1302,7 @@ function renderAll() {
       <td><span class="nopol">${r.nopol}</span></td>
       <td>${typeArmadaCell(r.typeArmada)}</td>
       <td>${r.site}</td><td>${r.tujuan}</td>
+      <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
       <td><span class="tval">${ft(r.open)}</span></td>
       <td><span class="tval">${ft(r.close)}</span></td>
       <td><span class="tval">${ft(r.checkout)}</span></td>
