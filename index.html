@@ -569,9 +569,131 @@
     .summary { grid-template-columns: 1fr; }
     .last-update { display: none; }
   }
+
+  /* ─── LANDING PAGE (POV SELECTOR) ─────────────────────────── */
+  #landingPage {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .landing-logo {
+    width: 64px; height: 64px;
+    background: var(--accent-grad);
+    border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: #fff; letter-spacing: .3px;
+    box-shadow: 0 10px 28px -8px rgba(29,78,216,.45), inset 0 1px 0 rgba(255,255,255,.25);
+    margin-bottom: 20px;
+  }
+  .landing-title {
+    font-size: 26px; font-weight: 800; color: var(--text);
+    letter-spacing: -.02em; margin-bottom: 6px;
+  }
+  .landing-sub {
+    font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 40px;
+  }
+  .pov-grid {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+  }
+  .pov-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    width: 260px;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    text-align: left;
+  }
+  .pov-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent2);
+  }
+  .pov-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 16px;
+  }
+  .pov-icon.ndc { background: var(--accent-bg); }
+  .pov-icon.hub { background: var(--hit-bg); }
+  .pov-name {
+    font-size: 17px; font-weight: 800; color: var(--text);
+    letter-spacing: -.01em; margin-bottom: 6px;
+  }
+  .pov-desc {
+    font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 500;
+  }
+  .pov-cta {
+    margin-top: 18px;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ─── DASHBOARD WRAPPER & POV BACK BUTTON ────────────────── */
+  #dashboardWrapper { display: none; }
+  .pov-back-btn {
+    background: var(--surface); border: 1px solid var(--border2); color: var(--text);
+    padding: 8px 14px; border-radius: 9px; cursor: pointer; font-size: 12px;
+    font-family: var(--sans); font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: var(--shadow-xs);
+    transition: all .15s ease;
+  }
+  .pov-back-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pov-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .6px;
+    padding: 4px 10px; border-radius: 999px;
+    text-transform: uppercase;
+    background: var(--accent-bg); color: var(--accent);
+    border: 1px solid var(--load-border);
+  }
+  .pov-badge.hub { background: var(--hit-bg); color: var(--hit-text); border-color: var(--hit-border); }
+
+  /* HUB mode: hide elements not relevant for HUB POV */
+  body.pov-hub .s-card[data-filter-key="ontime"],
+  body.pov-hub .s-card[data-filter-key="wait"],
+  body.pov-hub .s-card[data-filter-key="loading"],
+  body.pov-hub .s-card[data-filter-key="belum"] { display: none; }
+
+  body.pov-hub .summary { grid-template-columns: repeat(2,1fr); }
+  @media (max-width: 768px) {
+    body.pov-hub .summary { grid-template-columns: repeat(2,1fr); }
+  }
+
+  body.pov-hub .tab-btn[data-tab="t-arrive"],
+  body.pov-hub .tab-btn[data-tab="t-wait"],
+  body.pov-hub .tab-btn[data-tab="t-load"],
+  body.pov-hub .tab-btn[data-tab="t-belum"] { display: none; }
 </style>
 </head>
 <body>
+
+<!-- LANDING PAGE: POV SELECTOR -->
+<div id="landingPage">
+  <div class="landing-logo">KL</div>
+  <div class="landing-title">Armada Hub Monitor</div>
+  <div class="landing-sub">Kawan Lama Group — Supply Chain Transport · Pilih sudut pandang dashboard</div>
+  <div class="pov-grid">
+    <div class="pov-card" onclick="enterDashboard('ndc')">
+      <div class="pov-icon ndc">🏢</div>
+      <div class="pov-name">NDC</div>
+      <div class="pov-desc">Tampilan lengkap — semua KPI, performa per tujuan, dan seluruh detail status LC (On Time Arrive, Waiting to Load, On Loading, Performa Loading, Belum Datang).</div>
+      <div class="pov-cta">Masuk sebagai NDC →</div>
+    </div>
+    <div class="pov-card" onclick="enterDashboard('hub')">
+      <div class="pov-icon hub">📦</div>
+      <div class="pov-name">HUB</div>
+      <div class="pov-desc">Tampilan ringkas — Total LC & LC Checkout, performa per tujuan, dan detail Performa Loading saja.</div>
+      <div class="pov-cta">Masuk sebagai HUB →</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD WRAPPER -->
+<div id="dashboardWrapper">
 
 <!-- HEADER -->
 <header class="header">
@@ -583,8 +705,10 @@
     </div>
   </div>
   <div class="header-right">
+    <span class="pov-badge" id="povBadge">NDC</span>
     <span class="last-update" id="lastUpdate">—</span>
     <button class="btn" onclick="loadData()">↻ Refresh</button>
+    <button class="pov-back-btn" onclick="exitDashboard()">← Pilih POV</button>
   </div>
 </header>
 
@@ -703,11 +827,11 @@
 <!-- DETAIL TABS -->
 <div class="tabs-wrap">
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('t-arrive',this)">🚛 On Time Arrive <span class="tab-badge" id="badge-t-arrive">0</span></button>
-    <button class="tab-btn" onclick="switchTab('t-wait',this)">⏳ Waiting to Load <span class="tab-badge" id="badge-t-wait">0</span></button>
-    <button class="tab-btn" onclick="switchTab('t-load',this)">📦 On Loading <span class="tab-badge" id="badge-t-load">0</span></button>
-    <button class="tab-btn" onclick="switchTab('t-performa',this)">📊 Performa Loading <span class="tab-badge" id="badge-t-performa">0</span></button>
-    <button class="tab-btn" onclick="switchTab('t-belum',this)">🕐 Belum Datang <span class="tab-badge" id="badge-t-belum">0</span></button>
+    <button class="tab-btn active" data-tab="t-arrive" onclick="switchTab('t-arrive',this)">🚛 On Time Arrive <span class="tab-badge" id="badge-t-arrive">0</span></button>
+    <button class="tab-btn" data-tab="t-wait" onclick="switchTab('t-wait',this)">⏳ Waiting to Load <span class="tab-badge" id="badge-t-wait">0</span></button>
+    <button class="tab-btn" data-tab="t-load" onclick="switchTab('t-load',this)">📦 On Loading <span class="tab-badge" id="badge-t-load">0</span></button>
+    <button class="tab-btn" data-tab="t-performa" onclick="switchTab('t-performa',this)">📊 Performa Loading <span class="tab-badge" id="badge-t-performa">0</span></button>
+    <button class="tab-btn" data-tab="t-belum" onclick="switchTab('t-belum',this)">🕐 Belum Datang <span class="tab-badge" id="badge-t-belum">0</span></button>
   </div>
   <div class="tab-content">
 
@@ -774,6 +898,8 @@
 
   </div>
 </div>
+
+</div><!-- /dashboardWrapper -->
 
 <script>
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQb5ps0bjSlColayRbAxGjmms8iDYDKUU1bikXGuAUAu9sSs6D4_K1sitKN94y8fPkQVd9Hs6uu2MI1/pub?gid=0&single=true&output=csv';
@@ -1354,10 +1480,50 @@ function clearDateRange() {
   renderAll();
 }
 
+// ─── POV SELECTOR (NDC / HUB) ────────────────────────────────
+let currentPOV = null;
+let dataLoaded = false;
+
+function enterDashboard(pov) {
+  currentPOV = pov;
+  document.getElementById('landingPage').style.display = 'none';
+  document.getElementById('dashboardWrapper').style.display = 'block';
+
+  document.body.classList.remove('pov-ndc','pov-hub');
+  document.body.classList.add('pov-' + pov);
+
+  const badge = document.getElementById('povBadge');
+  badge.textContent = pov.toUpperCase();
+  badge.classList.toggle('hub', pov === 'hub');
+
+  // HUB: force to Performa Loading tab (only visible one)
+  if (pov === 'hub') {
+    const performaBtn = document.querySelector('.tab-btn[data-tab="t-performa"]');
+    if (performaBtn) switchTab('t-performa', performaBtn);
+  } else {
+    const arriveBtn = document.querySelector('.tab-btn[data-tab="t-arrive"]');
+    if (arriveBtn) switchTab('t-arrive', arriveBtn);
+  }
+
+  if (!dataLoaded) {
+    loadData();
+    setInterval(loadData, 5*60*1000);
+    dataLoaded = true;
+  } else {
+    renderAll();
+  }
+}
+
+function exitDashboard() {
+  document.getElementById('dashboardWrapper').style.display = 'none';
+  document.getElementById('landingPage').style.display = 'flex';
+  document.body.classList.remove('pov-ndc','pov-hub');
+  currentPOV = null;
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
   updateSummaryCardUI();
-  loadData();
-  setInterval(loadData, 5*60*1000);
+  // Data dimuat saat user memilih POV (lihat enterDashboard)
 });
 </script>
 </body>
