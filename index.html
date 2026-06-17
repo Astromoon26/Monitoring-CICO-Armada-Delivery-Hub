@@ -563,16 +563,24 @@
   .sp-detail-hint { font-size: 10px; color: var(--muted); font-weight: 500; }
   .sp-detail-clear { font-size: 10px; font-weight: 700; color: var(--miss-text); cursor: pointer; padding: 2px 8px; border-radius: 6px; background: var(--miss-bg); border: 1px solid var(--miss-border); display: none; }
   .sp-detail-clear.visible { display: inline-block; }
-  .sp-detail-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; }
-  .sp-detail-row { display: flex; flex-wrap: nowrap; gap: 8px; }
-  .sp-type-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s ease; white-space: nowrap; flex: 0 0 auto; }
+  .sp-detail-scroll { overflow: visible; padding-bottom: 2px; }
+  .sp-detail-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .sp-type-chip { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all .15s ease; min-width: 0; }
   .sp-type-chip:hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-1px); }
   .sp-type-chip.active { border-color: var(--accent); background: var(--accent-bg); box-shadow: var(--ring); }
   .sp-type-chip.active .sp-type-name { color: var(--accent); }
-  .sp-type-name { font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .03em; }
-  .sp-type-scores { display: inline-flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; }
-  .sp-type-scores .sp-h { color: var(--hit-text); background: var(--hit-bg); border: 1px solid var(--hit-border); padding: 1px 7px; border-radius: 6px; }
-  .sp-type-scores .sp-m { color: var(--miss-text); background: var(--miss-bg); border: 1px solid var(--miss-border); padding: 1px 7px; border-radius: 6px; }
+  .sp-type-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .sp-type-name { font-size: 12px; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .03em; line-height: 1.2; }
+  .sp-type-total { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 2px 7px; border-radius: 6px; white-space: nowrap; }
+  .sp-type-scores { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; }
+  .sp-type-scores .sp-h { color: var(--hit-text); background: var(--hit-bg); border: 1px solid var(--hit-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
+  .sp-type-scores .sp-m { color: var(--miss-text); background: var(--miss-bg); border: 1px solid var(--miss-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
+  .sp-type-meta { display: grid; grid-template-columns: 1fr; gap: 3px; font-size: 10.5px; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 7px; }
+  .sp-type-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .sp-type-meta-row .sp-meta-label { font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 9.5px; }
+  .sp-type-meta-row .sp-meta-val { font-family: var(--mono); font-weight: 700; color: var(--text); font-size: 11px; }
+  .sp-type-meta-row.sp-hit-row .sp-meta-val { color: var(--hit-text); }
+  .sp-type-meta-row.sp-miss-row .sp-meta-val { color: var(--miss-text); }
   .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; }
 
   @media (max-width: 820px) {
@@ -957,7 +965,7 @@
   <!-- KARTU BARU: Target Loading -->
   <div class="s-card" onclick="toggleSummaryCard(this,'tgtload')" data-filter-key="tgtload">
     <span class="s-card-click-hint">klik filter</span>
-    <div class="s-label" style="font-size:8.5px">Target Loading</div>
+    <div class="s-label" style="font-size:8.5px">Performa Loading</div>
     <div style="display:flex;align-items:baseline;gap:5px;margin:3px 0 1px">
       <span style="font-size:10px;font-weight:600;color:var(--muted)">Selesai</span>
       <span id="sTgtLoadTotal" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text)">—</span>
@@ -1155,7 +1163,7 @@ function updateTujuanChips() {
       <span class="chip-dot"></span>${t}
     </span>`
   ).join('');
-  const cardLabels = { ontime:'On Time Arrive', wait:'Tunggu Loading', loading:'Sedang Loading', checkout:'LC Checkout', belum:'Belum Datang', tgtload:'Target Loading' };
+  const cardLabels = { ontime:'On Time Arrive', wait:'Tunggu Loading', loading:'Sedang Loading', checkout:'LC Checkout', belum:'Belum Datang', tgtload:'Performa Loading' };
   [...selectedSummaryCards].forEach(key => {
     chipsEl.innerHTML += `<span class="summary-filter-chip active" style="background:var(--accent-bg);border-color:var(--accent2);color:var(--accent)" onclick="toggleSummaryCard(null,'${key}')">
       <span class="chip-dot"></span>${cardLabels[key]||key}
@@ -1502,8 +1510,11 @@ function renderAll() {
   const typeMap = {};
   hasTgtLoad.forEach(r => {
     const t = (r.typeArmada || '').toString().trim().toUpperCase() || '—';
-    if (!typeMap[t]) typeMap[t] = { hit: 0, miss: 0 };
-    if (r.loadHit) typeMap[t].hit++; else typeMap[t].miss++;
+    if (!typeMap[t]) typeMap[t] = { hit: 0, miss: 0, tgtSum: 0, tgtN: 0, hitSum: 0, hitN: 0, missSum: 0, missN: 0 };
+    const m = typeMap[t];
+    if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
+    if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
+    else { m.miss++; m.missSum += r.loadDur; m.missN++; }
   });
   const types = Object.keys(typeMap).sort((a,b) => (typeMap[b].hit+typeMap[b].miss) - (typeMap[a].hit+typeMap[a].miss));
   const grid = document.getElementById('spTypeGrid');
@@ -1513,12 +1524,25 @@ function renderAll() {
     grid.innerHTML = types.map(t => {
       const safe = t.replace(/'/g, "\\'");
       const isActive = selectedTypeArmada.has(t);
+      const m = typeMap[t];
+      const total = m.hit + m.miss;
+      const avgTgt  = m.tgtN  ? fdurMs(m.tgtSum  / m.tgtN)  : '—';
+      const avgHit  = m.hitN  ? fdurMs(m.hitSum  / m.hitN)  : '—';
+      const avgMiss = m.missN ? fdurMs(m.missSum / m.missN) : '—';
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
-        <span class="sp-type-name">${t}</span>
-        <span class="sp-type-scores">
-          <span class="sp-h">HIT ${typeMap[t].hit}</span>
-          <span class="sp-m">MISS ${typeMap[t].miss}</span>
-        </span>
+        <div class="sp-type-head">
+          <span class="sp-type-name">${t}</span>
+          <span class="sp-type-total">Total ${total}</span>
+        </div>
+        <div class="sp-type-scores">
+          <span class="sp-h">HIT ${m.hit}</span>
+          <span class="sp-m">MISS ${m.miss}</span>
+        </div>
+        <div class="sp-type-meta">
+          <div class="sp-type-meta-row"><span class="sp-meta-label">Target</span><span class="sp-meta-val">${avgTgt}</span></div>
+          <div class="sp-type-meta-row sp-hit-row"><span class="sp-meta-label">Avg HIT</span><span class="sp-meta-val">${avgHit}</span></div>
+          <div class="sp-type-meta-row sp-miss-row"><span class="sp-meta-label">Avg MISS</span><span class="sp-meta-val">${avgMiss}</span></div>
+        </div>
       </div>`;
     }).join('');
   }
