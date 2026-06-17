@@ -539,6 +539,32 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
   ::selection { background: rgba(29,78,216,.18); color: var(--text); }
 
+
+  /* PERFORMA SUMMARY (muncul saat tab Performa Loading aktif) */
+  .summary-performa { display: none; grid-template-columns: repeat(3, 1fr) 2fr; gap: 14px; padding: 18px 28px 6px; }
+  body.tab-performa-active .summary { display: none; }
+  body.tab-performa-active .summary-performa { display: grid; animation: fadeUp .35s ease both; }
+  .sp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow-xs); position: relative; }
+  .sp-card .sp-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .sp-card .sp-val { font-size: 28px; font-weight: 800; font-family: var(--mono); margin-top: 6px; color: var(--text); }
+  .sp-card.sp-hit  { border-left: 4px solid var(--hit); }
+  .sp-card.sp-hit  .sp-val { color: var(--hit-text); }
+  .sp-card.sp-miss { border-left: 4px solid var(--miss); }
+  .sp-card.sp-miss .sp-val { color: var(--miss-text); }
+  .sp-card.sp-total { border-left: 4px solid var(--accent); }
+  .sp-card.sp-total .sp-val { color: var(--accent); }
+  .sp-card.sp-detail { padding: 12px 16px; }
+  .sp-detail-title { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .sp-detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; }
+  .sp-type-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; }
+  .sp-type-name { font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sp-type-scores { display: flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; }
+  .sp-type-scores .sp-h { color: var(--hit-text); background: var(--hit-bg); border: 1px solid var(--hit-border); padding: 1px 6px; border-radius: 6px; }
+  .sp-type-scores .sp-m { color: var(--miss-text); background: var(--miss-bg); border: 1px solid var(--miss-border); padding: 1px 6px; border-radius: 6px; }
+  .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; }
+  @media (max-width: 1100px) { .summary-performa { grid-template-columns: repeat(2, 1fr); } .sp-card.sp-detail { grid-column: 1 / -1; } }
+  @media (max-width: 640px)  { .summary-performa { grid-template-columns: 1fr; padding: 14px 16px; } }
+
   @media (max-width: 1400px) { .summary { grid-template-columns: repeat(4,1fr); } }
   @media (max-width: 1024px) {
     .summary { grid-template-columns: repeat(3,1fr); }
@@ -925,6 +951,29 @@
       <span class="s-score-miss" id="sTgtLoadMiss">—</span>
     </div>
     <div class="s-bar"><div class="s-bar-fill" id="barTgtLoad" style="width:0%;background:var(--hit)"></div></div>
+  </div>
+</div>
+
+<!-- SUMMARY KHUSUS TAB PERFORMA LOADING -->
+<div class="summary-performa" id="summaryPerforma">
+  <div class="sp-card sp-total">
+    <div class="sp-label">Total LC</div>
+    <div class="sp-val" id="spTotal">—</div>
+    <div class="s-sub" style="margin-top:4px">selesai loading + ada target</div>
+  </div>
+  <div class="sp-card sp-hit">
+    <div class="sp-label">Total LC HIT</div>
+    <div class="sp-val" id="spHit">—</div>
+    <div class="s-sub" style="margin-top:4px">durasi ≤ target loading</div>
+  </div>
+  <div class="sp-card sp-miss">
+    <div class="sp-label">Total LC MISS</div>
+    <div class="sp-val" id="spMiss">—</div>
+    <div class="s-sub" style="margin-top:4px">durasi &gt; target loading</div>
+  </div>
+  <div class="sp-card sp-detail">
+    <div class="sp-detail-title">Detail per Type Armada</div>
+    <div class="sp-detail-grid" id="spTypeGrid"></div>
   </div>
 </div>
 
@@ -1409,6 +1458,31 @@ function renderAll() {
   if(total)             document.getElementById('barBelumDatang').style.width = Math.round(belumDatang/total*100)+'%';
   if(hasTgtLoad.length) document.getElementById('barTgtLoad').style.width   = Math.round(tgtLoadHit/hasTgtLoad.length*100)+'%';
 
+  // Performa summary (per type armada)
+  document.getElementById('spTotal').textContent = hasTgtLoad.length || '—';
+  document.getElementById('spHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
+  document.getElementById('spMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
+  const typeMap = {};
+  hasTgtLoad.forEach(r => {
+    const t = (r.typeArmada || '').toString().trim().toUpperCase() || '—';
+    if (!typeMap[t]) typeMap[t] = { hit: 0, miss: 0 };
+    if (r.loadHit) typeMap[t].hit++; else typeMap[t].miss++;
+  });
+  const types = Object.keys(typeMap).sort((a,b) => (typeMap[b].hit+typeMap[b].miss) - (typeMap[a].hit+typeMap[a].miss));
+  const grid = document.getElementById('spTypeGrid');
+  if (!types.length) {
+    grid.innerHTML = '<div class="sp-empty">Tidak ada data.</div>';
+  } else {
+    grid.innerHTML = types.map(t => `
+      <div class="sp-type-row" title="${t}">
+        <span class="sp-type-name">${t}</span>
+        <span class="sp-type-scores">
+          <span class="sp-h">HIT ${typeMap[t].hit}</span>
+          <span class="sp-m">MISS ${typeMap[t].miss}</span>
+        </span>
+      </div>`).join('');
+  }
+
   updateSummaryCardUI();
   updateTujuanChips();
 
@@ -1551,6 +1625,7 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  document.body.classList.toggle('tab-performa-active', id === 't-performa');
 }
 function clearDateRange() {
   document.getElementById('fDateFrom').value='';
