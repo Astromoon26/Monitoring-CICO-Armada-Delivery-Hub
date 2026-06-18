@@ -556,6 +556,9 @@
   .sp-card.sp-hit  .sp-val { color: var(--hit-text);  font-size: 20px; }
   .sp-card.sp-miss { border-left: 4px solid var(--miss); padding: 8px 12px; }
   .sp-card.sp-miss .sp-val { color: var(--miss-text); font-size: 20px; }
+  .sp-pct { font-size: 11px; font-weight: 700; margin-top: 2px; }
+  .sp-pct.hit-pct { color: var(--hit-text); }
+  .sp-pct.miss-pct { color: var(--miss-text); }
 
   .sp-card.sp-detail { padding: 12px 14px; display: flex; flex-direction: column; min-width: 0; }
   .sp-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
@@ -575,6 +578,11 @@
   .sp-type-scores { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; }
   .sp-type-scores .sp-h { color: var(--hit-text); background: var(--hit-bg); border: 1px solid var(--hit-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
   .sp-type-scores .sp-m { color: var(--miss-text); background: var(--miss-bg); border: 1px solid var(--miss-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
+  .sp-type-pct { display: flex; gap: 8px; font-size: 10px; color: var(--muted); margin-top: 2px; justify-content: space-around; border-top: 1px dashed var(--border); padding-top: 6px; }
+  .sp-type-pct span { font-weight: 600; }
+  .sp-type-pct .pct-hit { color: var(--hit-text); }
+  .sp-type-pct .pct-miss { color: var(--miss-text); }
+
   .sp-type-meta { display: grid; grid-template-columns: 1fr; gap: 3px; font-size: 10.5px; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 7px; }
   .sp-type-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
   .sp-type-meta-row .sp-meta-label { font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 9.5px; }
@@ -990,10 +998,12 @@
       <div class="sp-card sp-hit">
         <div class="sp-label">HIT</div>
         <div class="sp-val" id="spHit">—</div>
+        <div class="sp-pct hit-pct" id="spHitPct">—</div>
       </div>
       <div class="sp-card sp-miss">
         <div class="sp-label">MISS</div>
         <div class="sp-val" id="spMiss">—</div>
+        <div class="sp-pct miss-pct" id="spMissPct">—</div>
       </div>
     </div>
   </div>
@@ -1496,6 +1506,13 @@ function renderAll() {
   document.getElementById('sTgtLoadHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('sTgtLoadMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
 
+  // ======== PERSENTASE UNTUK SUMMARY PERFORMA ==========
+  const totalTgt = hasTgtLoad.length;
+  const hitPct = totalTgt ? Math.round(tgtLoadHit / totalTgt * 100) : 0;
+  const missPct = totalTgt ? Math.round(tgtLoadMiss / totalTgt * 100) : 0;
+  document.getElementById('spHitPct').textContent = hitPct + '%';
+  document.getElementById('spMissPct').textContent = missPct + '%';
+
   if(hasCheckin.length) document.getElementById('barOntime').style.width    = Math.round(ontime/hasCheckin.length*100)+'%';
   if(total)             document.getElementById('barWait').style.width      = Math.round(waiting/total*100)+'%';
   if(total)             document.getElementById('barLoading').style.width   = Math.round(loading/total*100)+'%';
@@ -1507,24 +1524,24 @@ function renderAll() {
   document.getElementById('spTotal').textContent = hasTgtLoad.length || '—';
   document.getElementById('spHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('spMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
+
   const typeMap = {};
   hasTgtLoad.forEach(r => {
     const t = (r.typeArmada || '').toString().trim().toUpperCase() || '—';
     if (!typeMap[t]) typeMap[t] = { 
-  hit: 0, miss: 0, 
-  tgtSum: 0, tgtN: 0, 
-  hitSum: 0, hitN: 0, 
-  missSum: 0, missN: 0,
-  loadSum: 0, loadN: 0   // ← baru
-};
-    // di dalam loop hasTgtLoad
-const m = typeMap[t];
-if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
-if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
-else { m.miss++; m.missSum += r.loadDur; m.missN++; }
-// ← tambahkan ini
-m.loadSum += r.loadDur;
-m.loadN++;
+      hit: 0, miss: 0, 
+      tgtSum: 0, tgtN: 0, 
+      hitSum: 0, hitN: 0, 
+      missSum: 0, missN: 0,
+      loadSum: 0, loadN: 0
+    };
+    const m = typeMap[t];
+    if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
+    if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
+    else { m.miss++; m.missSum += r.loadDur; m.missN++; }
+    // akumulasi untuk avg loading
+    m.loadSum += r.loadDur;
+    m.loadN++;
   });
   const types = Object.keys(typeMap).sort((a,b) => (typeMap[b].hit+typeMap[b].miss) - (typeMap[a].hit+typeMap[a].miss));
   const grid = document.getElementById('spTypeGrid');
@@ -1540,6 +1557,10 @@ m.loadN++;
       const avgHit  = m.hitN  ? fdurMs(m.hitSum  / m.hitN)  : '—';
       const avgMiss = m.missN ? fdurMs(m.missSum / m.missN) : '—';
       const avgLoading = m.loadN ? fdurMs(m.loadSum / m.loadN) : '—';
+      // persentase
+      const pctHit = total ? Math.round(m.hit / total * 100) : 0;
+      const pctMiss = total ? Math.round(m.miss / total * 100) : 0;
+
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
         <div class="sp-type-head">
           <span class="sp-type-name">${t}</span>
@@ -1548,6 +1569,10 @@ m.loadN++;
         <div class="sp-type-scores">
           <span class="sp-h">HIT ${m.hit}</span>
           <span class="sp-m">MISS ${m.miss}</span>
+        </div>
+        <div class="sp-type-pct">
+          <span>HIT <span class="pct-hit">${pctHit}%</span></span>
+          <span>MISS <span class="pct-miss">${pctMiss}%</span></span>
         </div>
         <div class="sp-type-meta">
           <div class="sp-type-meta-row"><span class="sp-meta-label">Target</span><span class="sp-meta-val">${avgTgt}</span></div>
