@@ -1510,11 +1510,21 @@ function renderAll() {
   const typeMap = {};
   hasTgtLoad.forEach(r => {
     const t = (r.typeArmada || '').toString().trim().toUpperCase() || '—';
-    if (!typeMap[t]) typeMap[t] = { hit: 0, miss: 0, tgtSum: 0, tgtN: 0, hitSum: 0, hitN: 0, missSum: 0, missN: 0 };
-    const m = typeMap[t];
-    if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
-    if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
-    else { m.miss++; m.missSum += r.loadDur; m.missN++; }
+    if (!typeMap[t]) typeMap[t] = { 
+  hit: 0, miss: 0, 
+  tgtSum: 0, tgtN: 0, 
+  hitSum: 0, hitN: 0, 
+  missSum: 0, missN: 0,
+  loadSum: 0, loadN: 0   // ← baru
+};
+    // di dalam loop hasTgtLoad
+const m = typeMap[t];
+if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
+if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
+else { m.miss++; m.missSum += r.loadDur; m.missN++; }
+// ← tambahkan ini
+m.loadSum += r.loadDur;
+m.loadN++;
   });
   const types = Object.keys(typeMap).sort((a,b) => (typeMap[b].hit+typeMap[b].miss) - (typeMap[a].hit+typeMap[a].miss));
   const grid = document.getElementById('spTypeGrid');
@@ -1529,6 +1539,7 @@ function renderAll() {
       const avgTgt  = m.tgtN  ? fdurMs(m.tgtSum  / m.tgtN)  : '—';
       const avgHit  = m.hitN  ? fdurMs(m.hitSum  / m.hitN)  : '—';
       const avgMiss = m.missN ? fdurMs(m.missSum / m.missN) : '—';
+      const avgLoading = m.loadN ? fdurMs(m.loadSum / m.loadN) : '—';
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
         <div class="sp-type-head">
           <span class="sp-type-name">${t}</span>
@@ -1542,6 +1553,7 @@ function renderAll() {
           <div class="sp-type-meta-row"><span class="sp-meta-label">Target</span><span class="sp-meta-val">${avgTgt}</span></div>
           <div class="sp-type-meta-row sp-hit-row"><span class="sp-meta-label">Avg HIT</span><span class="sp-meta-val">${avgHit}</span></div>
           <div class="sp-type-meta-row sp-miss-row"><span class="sp-meta-label">Avg MISS</span><span class="sp-meta-val">${avgMiss}</span></div>
+          <div class="sp-type-meta-row"><span class="sp-meta-label">Avg Loading</span><span class="sp-meta-val">${avgLoading}</span></div>
         </div>
       </div>`;
     }).join('');
