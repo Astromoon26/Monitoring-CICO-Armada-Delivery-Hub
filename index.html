@@ -337,6 +337,33 @@
   .s-score-miss { font-size: 17px; font-weight: 700; font-family: var(--mono); color: var(--miss-text); }
   .s-score-sub  { font-size: 9px; font-weight: 600; color: var(--muted); }
 
+  /* Persentase di summary card */
+  .s-pct {
+    font-size: 11px; font-weight: 700; font-family: var(--mono);
+    margin-left: 4px;
+  }
+  .s-pct-hit { color: var(--hit-text); }
+  .s-pct-miss { color: var(--miss-text); }
+  .s-pct-na { color: var(--muted); }
+  .s-score-wrapper {
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .s-pct-group {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; font-weight: 600; color: var(--muted);
+  }
+  .s-pct-group .pct-val {
+    font-family: var(--mono); font-weight: 700;
+  }
+  .s-pct-group .pct-hit { color: var(--hit-text); }
+  .s-pct-group .pct-miss { color: var(--miss-text); }
+
+  .s-pct-divider {
+    color: var(--border2);
+    font-weight: 300;
+  }
+
   /* KPI PER TUJUAN */
   .kpi-section { padding: 4px 28px 22px; }
   .kpi-title {
@@ -928,10 +955,17 @@
       <span style="font-size:10px;font-weight:600;color:var(--muted)">Total CI</span>
       <span id="sCheckinTotal" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text)">—</span>
     </div>
-    <div class="s-score">
-      <span class="s-score-hit" id="sOntimeHit">—</span>
-      <span class="s-score-sep">/</span>
-      <span class="s-score-miss" id="sOntimeMiss">—</span>
+    <div class="s-score-wrapper">
+      <div class="s-score">
+        <span class="s-score-hit" id="sOntimeHit">—</span>
+        <span class="s-score-sep">/</span>
+        <span class="s-score-miss" id="sOntimeMiss">—</span>
+      </div>
+      <div class="s-pct-group" id="sOntimePctGroup">
+        <span>HIT <span class="pct-val pct-hit" id="sOntimeHitPct">—</span></span>
+        <span class="s-pct-divider">|</span>
+        <span>MISS <span class="pct-val pct-miss" id="sOntimeMissPct">—</span></span>
+      </div>
     </div>
     <div class="s-bar"><div class="s-bar-fill" id="barOntime" style="width:0%;background:var(--hit)"></div></div>
   </div>
@@ -956,10 +990,17 @@
       <span style="font-size:10px;font-weight:600;color:var(--muted)">Total CO</span>
       <span id="sCheckout" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text)">—</span>
     </div>
-    <div class="s-score">
-      <span class="s-score-hit" id="sCheckoutHit">—</span>
-      <span class="s-score-sep">/</span>
-      <span class="s-score-miss" id="sCheckoutMiss">—</span>
+    <div class="s-score-wrapper">
+      <div class="s-score">
+        <span class="s-score-hit" id="sCheckoutHit">—</span>
+        <span class="s-score-sep">/</span>
+        <span class="s-score-miss" id="sCheckoutMiss">—</span>
+      </div>
+      <div class="s-pct-group" id="sCheckoutPctGroup">
+        <span>HIT <span class="pct-val pct-hit" id="sCheckoutHitPct">—</span></span>
+        <span class="s-pct-divider">|</span>
+        <span>MISS <span class="pct-val pct-miss" id="sCheckoutMissPct">—</span></span>
+      </div>
     </div>
     <div class="s-bar"><div class="s-bar-fill" id="barCheckout" style="width:0%;background:var(--accent2)"></div></div>
   </div>
@@ -978,10 +1019,17 @@
       <span style="font-size:10px;font-weight:600;color:var(--muted)">Selesai</span>
       <span id="sTgtLoadTotal" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text)">—</span>
     </div>
-    <div class="s-score">
-      <span class="s-score-hit" id="sTgtLoadHit">—</span>
-      <span class="s-score-sep">/</span>
-      <span class="s-score-miss" id="sTgtLoadMiss">—</span>
+    <div class="s-score-wrapper">
+      <div class="s-score">
+        <span class="s-score-hit" id="sTgtLoadHit">—</span>
+        <span class="s-score-sep">/</span>
+        <span class="s-score-miss" id="sTgtLoadMiss">—</span>
+      </div>
+      <div class="s-pct-group" id="sTgtLoadPctGroup">
+        <span>HIT <span class="pct-val pct-hit" id="sTgtLoadHitPct">—</span></span>
+        <span class="s-pct-divider">|</span>
+        <span>MISS <span class="pct-val pct-miss" id="sTgtLoadMissPct">—</span></span>
+      </div>
     </div>
     <div class="s-bar"><div class="s-bar-fill" id="barTgtLoad" style="width:0%;background:var(--hit)"></div></div>
   </div>
@@ -1505,6 +1553,46 @@ function renderAll() {
   document.getElementById('sTgtLoadTotal').textContent = hasTgtLoad.length || '—';
   document.getElementById('sTgtLoadHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('sTgtLoadMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
+
+  // ======== PERSENTASE UNTUK SUMMARY KARTU ==========
+  // On Time Arrive
+  if (hasCheckin.length) {
+    const hitPct = Math.round(ontime / hasCheckin.length * 100);
+    const missPct = 100 - hitPct;
+    document.getElementById('sOntimeHitPct').textContent = hitPct + '%';
+    document.getElementById('sOntimeMissPct').textContent = missPct + '%';
+    document.getElementById('sOntimePctGroup').style.display = 'inline-flex';
+  } else {
+    document.getElementById('sOntimeHitPct').textContent = '—';
+    document.getElementById('sOntimeMissPct').textContent = '—';
+    document.getElementById('sOntimePctGroup').style.display = 'none';
+  }
+
+  // LC Checkout
+  if (hasTargetCO.length) {
+    const hitPct = Math.round(checkoutHit / hasTargetCO.length * 100);
+    const missPct = 100 - hitPct;
+    document.getElementById('sCheckoutHitPct').textContent = hitPct + '%';
+    document.getElementById('sCheckoutMissPct').textContent = missPct + '%';
+    document.getElementById('sCheckoutPctGroup').style.display = 'inline-flex';
+  } else {
+    document.getElementById('sCheckoutHitPct').textContent = '—';
+    document.getElementById('sCheckoutMissPct').textContent = '—';
+    document.getElementById('sCheckoutPctGroup').style.display = 'none';
+  }
+
+  // Performance Loading
+  if (hasTgtLoad.length) {
+    const hitPct = Math.round(tgtLoadHit / hasTgtLoad.length * 100);
+    const missPct = 100 - hitPct;
+    document.getElementById('sTgtLoadHitPct').textContent = hitPct + '%';
+    document.getElementById('sTgtLoadMissPct').textContent = missPct + '%';
+    document.getElementById('sTgtLoadPctGroup').style.display = 'inline-flex';
+  } else {
+    document.getElementById('sTgtLoadHitPct').textContent = '—';
+    document.getElementById('sTgtLoadMissPct').textContent = '—';
+    document.getElementById('sTgtLoadPctGroup').style.display = 'none';
+  }
 
   // ======== PERSENTASE UNTUK SUMMARY PERFORMA ==========
   const totalTgt = hasTgtLoad.length;
