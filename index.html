@@ -580,6 +580,9 @@
   .sp-pct { font-size: 11px; font-weight: 700; margin-top: 2px; }
   .sp-pct.hit-pct { color: var(--hit-text); }
   .sp-pct.miss-pct { color: var(--miss-text); }
+  .sp-val-row { display: flex; align-items: baseline; gap: 6px; }
+  .sp-val-row .sp-val { margin-top: 0; }
+  .sp-val-row .sp-pct-inline { font-size: inherit; font-weight: inherit; font-family: var(--mono); }
 
   .sp-card.sp-detail { padding: 12px 14px; display: flex; flex-direction: column; min-width: 0; }
   .sp-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
@@ -596,7 +599,7 @@
   .sp-type-chip {
     position: relative;
     display: flex; flex-direction: column; gap: 9px;
-    padding: 12px 14px 12px 22px; /* extra left padding utk status dot */
+    padding: 12px 14px 12px 14px;
     background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
     border: 1px solid var(--border);
     border-radius: 14px; cursor: pointer;
@@ -614,15 +617,6 @@
     background: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
   }
   .sp-type-chip.active .sp-type-name { color: var(--accent); }
-  /* Status dot dipindah ke kiri agar tidak menutup teks Total di kanan */
-  .sp-type-status-dot {
-    position: absolute; top: 14px; left: 9px;
-    width: 7px; height: 7px; border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 0 0 3px rgba(11,27,51,.04);
-  }
-  .sp-type-status-dot.good { background: var(--hit); }
-  .sp-type-status-dot.bad  { background: var(--miss); }
-
   .sp-type-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .sp-type-name-wrap { display: flex; align-items: center; gap: 9px; min-width: 0; }
   .sp-type-icon {
@@ -1182,13 +1176,17 @@
     <div class="sp-mini-row">
       <div class="sp-card sp-hit">
         <div class="sp-label">HIT</div>
-        <div class="sp-val" id="spHit">—</div>
-        <div class="sp-pct hit-pct" id="spHitPct">—</div>
+        <div class="sp-val-row">
+          <span class="sp-val" id="spHit">—</span>
+          <span class="sp-val sp-pct-inline hit-pct" id="spHitPct"></span>
+        </div>
       </div>
       <div class="sp-card sp-miss">
         <div class="sp-label">MISS</div>
-        <div class="sp-val" id="spMiss">—</div>
-        <div class="sp-pct miss-pct" id="spMissPct">—</div>
+        <div class="sp-val-row">
+          <span class="sp-val" id="spMiss">—</span>
+          <span class="sp-val sp-pct-inline miss-pct" id="spMissPct"></span>
+        </div>
       </div>
     </div>
 
@@ -1785,8 +1783,8 @@ function renderAll() {
   const totalTgt = hasTgtLoad.length;
   const hitPct = totalTgt ? Math.round(tgtLoadHit / totalTgt * 100) : 0;
   const missPct = totalTgt ? Math.round(tgtLoadMiss / totalTgt * 100) : 0;
-  document.getElementById('spHitPct').textContent = hitPct + '%';
-  document.getElementById('spMissPct').textContent = missPct + '%';
+  document.getElementById('spHitPct').textContent = totalTgt ? ('(' + hitPct + '%)') : '';
+  document.getElementById('spMissPct').textContent = totalTgt ? ('(' + missPct + '%)') : '';
 
   if(hasCheckin.length) document.getElementById('barOntime').style.width    = Math.round(ontime/hasCheckin.length*100)+'%';
   if(total)             document.getElementById('barWait').style.width      = Math.round(waiting/total*100)+'%';
@@ -1863,7 +1861,6 @@ function renderAll() {
       const statusGood = pctHit >= pctMiss;
 
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
-        <span class="sp-type-status-dot ${statusGood?'good':'bad'}"></span>
         <div class="sp-type-head-row">
           <div class="sp-type-name-wrap">
             <span class="sp-type-icon">${typeIcon(t)}</span>
