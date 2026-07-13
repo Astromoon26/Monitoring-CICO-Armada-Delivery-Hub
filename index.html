@@ -618,6 +618,42 @@
   .sp-type-meta-row.sp-miss-row .sp-meta-val { color: var(--miss-text); }
   .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; }
 
+  /* ─── STRIP RATA-RATA PROSES (BARU) ─────────────────────── */
+  .sp-process-strip {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .sp-process-card {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 12px;
+    padding: 11px 14px;
+    box-shadow: var(--shadow-xs);
+    display: flex; flex-direction: column; gap: 3px;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .sp-process-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .sp-process-card .spp-label {
+    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px;
+    color: var(--muted); display: flex; align-items: center; gap: 5px;
+  }
+  .sp-process-card .spp-val {
+    font-family: var(--mono); font-size: 19px; font-weight: 800;
+    color: var(--load-text); letter-spacing: -.02em; margin-top: 1px;
+  }
+  .sp-process-card .spp-sub { font-size: 9.5px; color: var(--muted); font-weight: 500; }
+  .sp-process-title {
+    grid-column: 1 / -1;
+    font-size: 10px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .8px;
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 4px;
+  }
+  .sp-process-title::after { content:''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+
   @media (max-width: 820px) {
     .summary-performa { grid-template-columns: 1fr; }
   }
@@ -1065,6 +1101,31 @@
       <div class="sp-detail-row" id="spTypeGrid"></div>
     </div>
   </div>
+
+  <!-- STRIP BARU: RATA-RATA DURASI PER TAHAP PROSES -->
+  <div class="sp-process-title">Rata-rata Durasi per Tahap Proses <span style="font-weight:500;text-transform:none;letter-spacing:0">(informatif, tanpa target)</span></div>
+  <div class="sp-process-strip">
+    <div class="sp-process-card">
+      <div class="spp-label">⏳ Waiting to Load</div>
+      <div class="spp-val" id="sppWait">—</div>
+      <div class="spp-sub">Check In → Open</div>
+    </div>
+    <div class="sp-process-card">
+      <div class="spp-label">📦 Check In → Close</div>
+      <div class="spp-val" id="sppCiClose">—</div>
+      <div class="spp-sub">Check In → Close</div>
+    </div>
+    <div class="sp-process-card">
+      <div class="spp-label">📄 Waiting Surat Jalan</div>
+      <div class="spp-val" id="sppWaitSJ">—</div>
+      <div class="spp-sub">Close → Check Out</div>
+    </div>
+    <div class="sp-process-card">
+      <div class="spp-label">🚪 Processing in DC</div>
+      <div class="spp-val" id="sppProcessDC">—</div>
+      <div class="spp-sub">Check In → Check Out</div>
+    </div>
+  </div>
 </div>
 
 <!-- KPI PER TUJUAN -->
@@ -1123,12 +1184,13 @@
 
     <!-- TAB 4: PERFORMA LOADING -->
     <div class="tab-pane" id="t-performa">
-      <div class="tab-panel-desc">Loading selesai — durasi aktual vs Target Loading · Hijau = HIT (≤ target), merah = MISS (&gt; target)</div>
+      <div class="tab-panel-desc">Loading selesai — durasi aktual vs Target Loading · Hijau = HIT (≤ target), merah = MISS (&gt; target). 4 kolom terakhir bersifat informatif (tanpa target pembanding).</div>
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
           <th>Req Stuffing</th><th>Open</th><th>Close</th><th>Check Out</th>
           <th>Target Loading</th><th>Durasi Loading</th>
+          <th>Waiting to Load</th><th>Check In → Close</th><th>Waiting Surat Jalan</th><th>Processing in DC</th>
         </tr></thead>
         <tbody id="t4"></tbody>
       </table></div>
@@ -1330,6 +1392,12 @@ function actualCell(timeD, targetD) {
   return `<span class="val-miss">${txt}</span>`;
 }
 
+// Render sel duration proses (informatif, warna netral biru)
+function procCell(ms) {
+  if (ms === null || ms === undefined || isNaN(ms)) return '<span style="color:var(--muted)">—</span>';
+  return `<span class="dur" style="color:var(--load-text)">${fdurMs(ms)}</span>`;
+}
+
 // LOAD
 async function loadData() {
   document.getElementById('lastUpdate').textContent = '⟳ Memuat...';
@@ -1360,6 +1428,15 @@ async function loadData() {
         ciDelta:(checkin&&tci)?checkin-tci:null,
         coDelta:(checkout&&tco)?checkout-tco:null,
         loadHit:(loadDur!==null&&tloadMs!==null)?loadDur<=tloadMs:null,
+        // ── 4 METRIK PROSES BARU (informatif, tanpa target) ──
+        // 1. Waiting to Load: Check In (K) sd Open (L)
+        waitToLoad:(checkin&&open)?open-checkin:null,
+        // 2. Check In Close: Check In (K) sd Close (M)
+        ciToClose:(checkin&&close)?close-checkin:null,
+        // 3. Waiting Surat Jalan: Close (M) sd Check Out (N)
+        waitSJ:(close&&checkout)?checkout-close:null,
+        // 4. Processing in DC: Check In (K) sd Check Out (N)
+        processingDC:(checkin&&checkout)?checkout-checkin:null,
       };
     });
     populateFilters();
@@ -1613,6 +1690,17 @@ function renderAll() {
   document.getElementById('spHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('spMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
 
+  // ======== RATA-RATA 4 METRIK PROSES BARU (dari data ter-filter) ========
+  const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0) / arr.length) : null;
+  const wtlArr = data.filter(r=>r.waitToLoad   !== null).map(r=>r.waitToLoad);
+  const cicArr = data.filter(r=>r.ciToClose    !== null).map(r=>r.ciToClose);
+  const wsjArr = data.filter(r=>r.waitSJ       !== null).map(r=>r.waitSJ);
+  const pdcArr = data.filter(r=>r.processingDC !== null).map(r=>r.processingDC);
+  document.getElementById('sppWait').textContent      = fdurMs(avg(wtlArr));
+  document.getElementById('sppCiClose').textContent   = fdurMs(avg(cicArr));
+  document.getElementById('sppWaitSJ').textContent    = fdurMs(avg(wsjArr));
+  document.getElementById('sppProcessDC').textContent = fdurMs(avg(pdcArr));
+
   const typeMap = {};
   hasTgtLoad.forEach(r => {
     const t = (r.typeArmada || '').toString().trim().toUpperCase() || '—';
@@ -1782,8 +1870,12 @@ function renderAll() {
       <td><span class="tval">${ft(r.checkout)}</span></td>
       <td><span class="tval">${tloadDisplay}</span></td>
       <td>${durCell}</td>
+      <td>${procCell(r.waitToLoad)}</td>
+      <td>${procCell(r.ciToClose)}</td>
+      <td>${procCell(r.waitSJ)}</td>
+      <td>${procCell(r.processingDC)}</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="12"><div class="empty">Belum ada armada yang selesai loading</div></td></tr>`;
+  }).join('') : `<tr><td colspan="16"><div class="empty">Belum ada armada yang selesai loading</div></td></tr>`;
 
   // PANEL 5: BELUM DATANG
   const p5 = data.filter(r=>!r.checkin);
