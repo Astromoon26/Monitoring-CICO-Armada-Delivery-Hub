@@ -595,63 +595,74 @@
   .sp-detail-clear.visible { display: inline-block; }
   .sp-detail-scroll { overflow: visible; padding-bottom: 2px; }
 
-  /* ─── DETAIL PER TYPE ARMADA — melebar ke samping, bukan ke bawah ─── */
-  .sp-detail-row { display: flex; flex-direction: column; gap: 10px; }
-  .sp-type-chip {
-    display: flex; align-items: stretch; gap: 18px;
-    padding: 13px 18px; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; cursor: pointer; transition: all .15s ease; width: 100%;
+  /* ─── DETAIL PER TYPE ARMADA — grid 2 kolom, kartu vertikal ─── */
+  .sp-detail-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
   }
-  .sp-type-chip:hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-1px); }
+  .sp-type-chip {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 16px 18px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; cursor: pointer; transition: all .15s ease;
+  }
+  .sp-type-chip:hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-1px); box-shadow: var(--shadow-md); }
   .sp-type-chip.active { border-color: var(--accent); background: var(--accent-bg); box-shadow: var(--ring); }
   .sp-type-chip.active .sp-type-name { color: var(--accent); }
 
-  .sp-type-head-col {
-    display: flex; flex-direction: column; gap: 7px; justify-content: center;
-    min-width: 148px; flex-shrink: 0;
-    border-right: 1px dashed var(--border2); padding-right: 16px;
+  .sp-type-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sp-type-name-wrap { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .sp-type-icon {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
   }
-  .sp-type-name { font-size: 12.5px; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .03em; line-height: 1.2; }
-  .sp-type-total { font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 2px 7px; border-radius: 6px; white-space: nowrap; width: fit-content; }
-  .sp-type-scores { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 10.5px; font-weight: 700; }
-  .sp-type-scores .sp-h { color: var(--hit-text); background: var(--hit-bg); border: 1px solid var(--hit-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
-  .sp-type-scores .sp-m { color: var(--miss-text); background: var(--miss-bg); border: 1px solid var(--miss-border); padding: 2px 8px; border-radius: 6px; flex: 1; text-align: center; }
-  .sp-type-pct { display: flex; gap: 10px; font-size: 10px; color: var(--muted); }
-  .sp-type-pct span { font-weight: 600; }
-  .sp-type-pct .pct-hit { color: var(--hit-text); }
-  .sp-type-pct .pct-miss { color: var(--miss-text); }
+  .sp-type-name { font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-type-total {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 8px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .sp-type-total b { color: var(--text); font-weight: 800; }
 
-  /* strip 8 metrik, disusun horizontal supaya kartu melebar ke samping */
+  .sp-type-hitmiss { display: flex; flex-direction: column; gap: 6px; }
+  .sp-type-hitmiss-row { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; gap: 8px; }
+  .sp-type-hitmiss-row .sp-h { color: var(--hit-text); white-space: nowrap; }
+  .sp-type-hitmiss-row .sp-m { color: var(--miss-text); white-space: nowrap; }
+  .sp-type-hitmiss-row .pct { font-weight: 600; color: var(--muted); }
+  .sp-type-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sp-bar-track { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+  .sp-bar-fill { height: 100%; border-radius: 999px; transition: width .5s ease; }
+  .sp-bar-fill.hit  { background: var(--hit); }
+  .sp-bar-fill.miss { background: var(--miss); }
+
+  .sp-type-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
   .sp-metric-row {
-    flex: 1; min-width: 0;
-    display: grid; grid-template-columns: repeat(8, minmax(76px, 1fr));
-    gap: 6px 10px; align-content: center;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
   }
   .sp-metric-tile {
-    display: flex; flex-direction: column; gap: 2px;
-    padding: 6px 9px; border-radius: 8px;
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 8px 10px; border-radius: 9px;
     background: var(--surface); border: 1px solid var(--border);
     min-width: 0;
   }
   .sp-metric-tile .smt-label {
-    font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .35px;
+    font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .35px;
     color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .sp-metric-tile .smt-val { font-family: var(--mono); font-size: 12.5px; font-weight: 800; color: var(--text); }
+  .sp-metric-tile .smt-val { font-family: var(--mono); font-size: 13px; font-weight: 800; color: var(--text); }
   .sp-metric-tile.smt-hit  { background: var(--hit-bg);  border-color: var(--hit-border); }
   .sp-metric-tile.smt-hit  .smt-val { color: var(--hit-text); }
   .sp-metric-tile.smt-miss { background: var(--miss-bg); border-color: var(--miss-border); }
   .sp-metric-tile.smt-miss .smt-val { color: var(--miss-text); }
   .sp-metric-tile.smt-proc { background: var(--load-bg); border-color: var(--load-border); }
   .sp-metric-tile.smt-proc .smt-val { color: var(--load-text); }
-  .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; }
+  .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; grid-column: 1 / -1; }
 
-  @media (max-width: 1200px) {
-    .sp-metric-row { grid-template-columns: repeat(4, minmax(76px,1fr)); }
+  @media (max-width: 1100px) {
+    .sp-detail-row { grid-template-columns: 1fr; }
   }
-  @media (max-width: 860px) {
-    .sp-type-chip { flex-direction: column; align-items: stretch; }
-    .sp-type-head-col { border-right: none; border-bottom: 1px dashed var(--border2); padding-right: 0; padding-bottom: 10px; flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; }
+  @media (max-width: 560px) {
+    .sp-metric-row { grid-template-columns: repeat(2, 1fr); }
   }
 
   /* ─── STRIP RATA-RATA PROSES (diperbagus) ─────────────────────── */
@@ -1457,6 +1468,15 @@ function typeArmadaCell(t) {
   if (!t) return '<span style="color:var(--muted)">—</span>';
   return `<span class="type-badge">${t}</span>`;
 }
+function typeIcon(t) {
+  const s = (t || '').toString().toLowerCase();
+  if (s.includes('wing')) return '📦';
+  if (s.includes('fuso')) return '🚚';
+  if (s.includes('cont')) return '🚛';
+  if (s.includes('cdd')) return '🚛';
+  if (s.includes('trailer')) return '🚛';
+  return '🚚';
+}
 
 // Render actual value with color based on hit/miss/no-target
 function actualCell(timeD, targetD) {
@@ -1827,25 +1847,31 @@ function renderAll() {
       const pctMiss = total ? Math.round(m.miss / total * 100) : 0;
 
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
-        <div class="sp-type-head-col">
-          <div class="sp-type-name">${t}</div>
-          <div class="sp-type-total">Total ${total}</div>
-          <div class="sp-type-scores">
-            <span class="sp-h">HIT ${m.hit}</span>
-            <span class="sp-m">MISS ${m.miss}</span>
+        <div class="sp-type-head-row">
+          <div class="sp-type-name-wrap">
+            <span class="sp-type-icon">${typeIcon(t)}</span>
+            <span class="sp-type-name">${isActive?'✓ ':''}${t}</span>
           </div>
-          <div class="sp-type-pct">
-            <span>HIT <span class="pct-hit">${pctHit}%</span></span>
-            <span>MISS <span class="pct-miss">${pctMiss}%</span></span>
+          <span class="sp-type-total">Total <b>${total}</b></span>
+        </div>
+        <div class="sp-type-hitmiss">
+          <div class="sp-type-hitmiss-row">
+            <span class="sp-h">Hit ${m.hit} <span class="pct">(${pctHit}%)</span></span>
+            <span class="sp-m">Miss ${m.miss} <span class="pct">(${pctMiss}%)</span></span>
+          </div>
+          <div class="sp-type-bars">
+            <div class="sp-bar-track"><div class="sp-bar-fill hit" style="width:${pctHit}%"></div></div>
+            <div class="sp-bar-track"><div class="sp-bar-fill miss" style="width:${pctMiss}%"></div></div>
           </div>
         </div>
+        <div class="sp-type-divider"></div>
         <div class="sp-metric-row">
           <div class="sp-metric-tile"><span class="smt-label">Target</span><span class="smt-val">${avgTgt}</span></div>
-          <div class="sp-metric-tile smt-hit"><span class="smt-label">Avg HIT</span><span class="smt-val">${avgHit}</span></div>
-          <div class="sp-metric-tile smt-miss"><span class="smt-label">Avg MISS</span><span class="smt-val">${avgMiss}</span></div>
+          <div class="sp-metric-tile smt-hit"><span class="smt-label">Avg Hit</span><span class="smt-val">${avgHit}</span></div>
+          <div class="sp-metric-tile smt-miss"><span class="smt-label">Avg Miss</span><span class="smt-val">${avgMiss}</span></div>
           <div class="sp-metric-tile"><span class="smt-label">Avg Loading</span><span class="smt-val">${avgLoading}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">Wait to Load</span><span class="smt-val">${avgWtl}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">CI → Close</span><span class="smt-val">${avgCic}</span></div>
+          <div class="sp-metric-tile smt-proc"><span class="smt-label">Wait Load</span><span class="smt-val">${avgWtl}</span></div>
+          <div class="sp-metric-tile smt-proc"><span class="smt-label">CI–Close</span><span class="smt-val">${avgCic}</span></div>
           <div class="sp-metric-tile smt-proc"><span class="smt-label">Wait SJ</span><span class="smt-val">${avgWsj}</span></div>
           <div class="sp-metric-tile smt-proc"><span class="smt-label">Proc. DC</span><span class="smt-val">${avgPdc}</span></div>
         </div>
