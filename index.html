@@ -595,67 +595,114 @@
   .sp-detail-clear.visible { display: inline-block; }
   .sp-detail-scroll { overflow: visible; padding-bottom: 2px; }
 
-  /* ─── DETAIL PER TYPE ARMADA — grid 2 kolom, kartu vertikal ─── */
+  /* ─── DETAIL PER TYPE ARMADA — kartu premium, grid 2 kolom ─── */
   .sp-detail-row {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
   }
   .sp-type-chip {
-    display: flex; flex-direction: column; gap: 12px;
-    padding: 16px 18px; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 14px; cursor: pointer; transition: all .15s ease;
+    position: relative;
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(11,27,51,.03), 0 8px 20px -14px rgba(11,27,51,.20);
+    transition: transform .2s cubic-bezier(.2,.7,.2,1), box-shadow .25s ease, border-color .2s ease;
   }
-  .sp-type-chip:hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-  .sp-type-chip.active { border-color: var(--accent); background: var(--accent-bg); box-shadow: var(--ring); }
+  .sp-type-chip:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(11,27,51,.04), 0 20px 36px -16px rgba(11,27,51,.24);
+    border-color: rgba(29,78,216,.25);
+  }
+  .sp-type-chip.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29,78,216,.14), 0 16px 32px -16px rgba(11,27,51,.26);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
+  }
   .sp-type-chip.active .sp-type-name { color: var(--accent); }
+  .sp-type-status-dot {
+    position: absolute; top: 18px; right: 20px;
+    width: 8px; height: 8px; border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.9);
+  }
+  .sp-type-status-dot.good { background: var(--hit); }
+  .sp-type-status-dot.bad  { background: var(--miss); }
 
-  .sp-type-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .sp-type-name-wrap { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .sp-type-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .sp-type-name-wrap { display: flex; align-items: center; gap: 11px; min-width: 0; }
   .sp-type-icon {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-    background: var(--surface); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+    background: var(--accent-grad);
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    box-shadow: 0 4px 10px -3px rgba(29,78,216,.4), inset 0 1px 0 rgba(255,255,255,.25);
+    position: relative;
   }
-  .sp-type-name { font-size: 13px; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sp-type-total {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--muted);
-    background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 8px;
-    white-space: nowrap; flex-shrink: 0;
+  .sp-type-icon::after {
+    content:''; position:absolute; inset:0; border-radius:inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,.22), transparent 55%);
   }
-  .sp-type-total b { color: var(--text); font-weight: 800; }
+  .sp-type-name { font-size: 14.5px; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-type-total-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+  .sp-type-total-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+  .sp-type-total-val {
+    font-family: var(--mono); font-size: 16px; font-weight: 800; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); padding: 3px 12px; border-radius: 8px;
+    min-width: 44px; text-align: center;
+  }
 
-  .sp-type-hitmiss { display: flex; flex-direction: column; gap: 6px; }
-  .sp-type-hitmiss-row { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; gap: 8px; }
-  .sp-type-hitmiss-row .sp-h { color: var(--hit-text); white-space: nowrap; }
-  .sp-type-hitmiss-row .sp-m { color: var(--miss-text); white-space: nowrap; }
-  .sp-type-hitmiss-row .pct { font-weight: 600; color: var(--muted); }
+  .sp-type-hitmiss { display: flex; flex-direction: column; gap: 8px; }
+  .sp-type-hitmiss-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sp-type-hitmiss-row .sp-h,
+  .sp-type-hitmiss-row .sp-m {
+    font-size: 12.5px; font-weight: 800; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .sp-type-hitmiss-row .sp-h { color: var(--hit-text); }
+  .sp-type-hitmiss-row .sp-m { color: var(--miss-text); }
+  .sp-type-hitmiss-row .sp-h::before,
+  .sp-type-hitmiss-row .sp-m::before {
+    content:''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .sp-type-hitmiss-row .sp-h::before { background: var(--hit); }
+  .sp-type-hitmiss-row .sp-m::before { background: var(--miss); }
+  .sp-type-hitmiss-row .pct { font-weight: 600; color: var(--muted); font-size: 11.5px; }
+
   .sp-type-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .sp-bar-track { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
-  .sp-bar-fill { height: 100%; border-radius: 999px; transition: width .5s ease; }
-  .sp-bar-fill.hit  { background: var(--hit); }
-  .sp-bar-fill.miss { background: var(--miss); }
+  .sp-bar-track { height: 7px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); overflow: hidden; }
+  .sp-bar-fill { height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.2,.7,.2,1); }
+  .sp-bar-fill.hit  { background: linear-gradient(90deg, #16A34A, #34D399); }
+  .sp-bar-fill.miss { background: linear-gradient(90deg, #DC2626, #F87171); }
 
-  .sp-type-divider { height: 1px; background: var(--border); margin: 2px 0; }
+  .sp-type-divider { height: 1px; background: linear-gradient(90deg, var(--border), transparent 85%); }
 
-  .sp-metric-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-  }
+  .sp-metric-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
   .sp-metric-tile {
-    display: flex; flex-direction: column; gap: 3px;
-    padding: 8px 10px; border-radius: 9px;
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 9px 10px 10px; border-radius: 11px;
     background: var(--surface); border: 1px solid var(--border);
     min-width: 0;
+    transition: transform .15s ease, box-shadow .15s ease;
   }
+  .sp-metric-tile:hover { transform: translateY(-1px); box-shadow: var(--shadow-xs); }
+  .sp-metric-head { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .smt-icon {
+    width: 18px; height: 18px; border-radius: 6px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+  }
+  .smt-icon.ic-target  { background: var(--accent-bg); color: var(--accent); }
+  .smt-icon.ic-hit      { background: var(--hit-bg); color: var(--hit-text); }
+  .smt-icon.ic-miss     { background: var(--miss-bg); color: var(--miss-text); }
+  .smt-icon.ic-loading  { background: var(--load-bg); color: var(--load-text); }
+  .smt-icon.ic-wait     { background: var(--warn-bg); color: var(--warn-text); }
+  .smt-icon.ic-cic      { background: var(--load-bg); color: var(--load-text); }
+  .smt-icon.ic-wsj      { background: #F3EEFF; color: #7C3AED; }
+  .smt-icon.ic-pdc      { background: var(--hit-bg); color: var(--hit-text); }
   .sp-metric-tile .smt-label {
-    font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .35px;
+    font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
     color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .sp-metric-tile .smt-val { font-family: var(--mono); font-size: 13px; font-weight: 800; color: var(--text); }
-  .sp-metric-tile.smt-hit  { background: var(--hit-bg);  border-color: var(--hit-border); }
-  .sp-metric-tile.smt-hit  .smt-val { color: var(--hit-text); }
-  .sp-metric-tile.smt-miss { background: var(--miss-bg); border-color: var(--miss-border); }
-  .sp-metric-tile.smt-miss .smt-val { color: var(--miss-text); }
-  .sp-metric-tile.smt-proc { background: var(--load-bg); border-color: var(--load-border); }
-  .sp-metric-tile.smt-proc .smt-val { color: var(--load-text); }
+  .sp-metric-tile .smt-val { font-family: var(--mono); font-size: 13.5px; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
   .sp-empty { font-size: 11px; color: var(--muted); padding: 8px 4px; grid-column: 1 / -1; }
 
   @media (max-width: 1100px) {
@@ -1846,13 +1893,19 @@ function renderAll() {
       const pctHit = total ? Math.round(m.hit / total * 100) : 0;
       const pctMiss = total ? Math.round(m.miss / total * 100) : 0;
 
+      const statusGood = pctHit >= pctMiss;
+
       return `<div class="sp-type-chip${isActive?' active':''}" title="${t}" onclick="toggleTypeArmadaFilter('${safe}')">
+        <span class="sp-type-status-dot ${statusGood?'good':'bad'}"></span>
         <div class="sp-type-head-row">
           <div class="sp-type-name-wrap">
             <span class="sp-type-icon">${typeIcon(t)}</span>
             <span class="sp-type-name">${isActive?'✓ ':''}${t}</span>
           </div>
-          <span class="sp-type-total">Total <b>${total}</b></span>
+          <div class="sp-type-total-wrap">
+            <span class="sp-type-total-label">Total</span>
+            <span class="sp-type-total-val">${total}</span>
+          </div>
         </div>
         <div class="sp-type-hitmiss">
           <div class="sp-type-hitmiss-row">
@@ -1866,14 +1919,38 @@ function renderAll() {
         </div>
         <div class="sp-type-divider"></div>
         <div class="sp-metric-row">
-          <div class="sp-metric-tile"><span class="smt-label">Target</span><span class="smt-val">${avgTgt}</span></div>
-          <div class="sp-metric-tile smt-hit"><span class="smt-label">Avg Hit</span><span class="smt-val">${avgHit}</span></div>
-          <div class="sp-metric-tile smt-miss"><span class="smt-label">Avg Miss</span><span class="smt-val">${avgMiss}</span></div>
-          <div class="sp-metric-tile"><span class="smt-label">Avg Loading</span><span class="smt-val">${avgLoading}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">Wait Load</span><span class="smt-val">${avgWtl}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">CI–Close</span><span class="smt-val">${avgCic}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">Wait SJ</span><span class="smt-val">${avgWsj}</span></div>
-          <div class="sp-metric-tile smt-proc"><span class="smt-label">Proc. DC</span><span class="smt-val">${avgPdc}</span></div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-target">◎</span><span class="smt-label">Target</span></div>
+            <span class="smt-val">${avgTgt}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-hit">✓</span><span class="smt-label">Avg Hit</span></div>
+            <span class="smt-val">${avgHit}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-miss">✕</span><span class="smt-label">Avg Miss</span></div>
+            <span class="smt-val">${avgMiss}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-loading">⬆</span><span class="smt-label">Avg Loading</span></div>
+            <span class="smt-val">${avgLoading}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-wait">⏳</span><span class="smt-label">Wait Load</span></div>
+            <span class="smt-val">${avgWtl}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-cic">📦</span><span class="smt-label">CI–Close</span></div>
+            <span class="smt-val">${avgCic}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-wsj">📄</span><span class="smt-label">Wait SJ</span></div>
+            <span class="smt-val">${avgWsj}</span>
+          </div>
+          <div class="sp-metric-tile">
+            <div class="sp-metric-head"><span class="smt-icon ic-pdc">🚪</span><span class="smt-label">Proc. DC</span></div>
+            <span class="smt-val">${avgPdc}</span>
+          </div>
         </div>
       </div>`;
     }).join('');
