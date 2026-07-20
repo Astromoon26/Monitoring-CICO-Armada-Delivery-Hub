@@ -717,10 +717,11 @@
     transition: transform .2s ease, box-shadow .2s ease;
   }
   .sp-process-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
-  .sp-process-card[data-stage="wait"]::before    { background: var(--warn-text); }
-  .sp-process-card[data-stage="ciclose"]::before { background: var(--accent2); }
-  .sp-process-card[data-stage="waitsj"]::before  { background: #8B5CF6; }
-  .sp-process-card[data-stage="total"]::before   { background: var(--hit-text); }
+  .sp-process-card[data-stage="wait"]::before      { background: var(--warn-text); }
+  .sp-process-card[data-stage="openclose"]::before { background: #F97316; }
+  .sp-process-card[data-stage="ciclose"]::before   { background: var(--accent2); }
+  .sp-process-card[data-stage="waitsj"]::before    { background: #8B5CF6; }
+  .sp-process-card[data-stage="total"]::before     { background: var(--hit-text); }
   .sp-process-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .sp-process-card.spp-highlight { background: linear-gradient(135deg, #F4FBF6 0%, #ECFDF3 100%); border-color: var(--hit-border); }
 
@@ -735,10 +736,11 @@
   .sp-process-card .spp-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 0; }
   .sp-process-card .spp-val { font-family: var(--mono); font-size: 17px; font-weight: 800; letter-spacing: -.02em; color: var(--text); justify-self: end; text-align: right; }
   .sp-process-card .spp-sub { grid-column: 1 / -1; font-size: 9.5px; color: var(--muted); font-weight: 500; margin-top: -2px; }
-  [data-stage="wait"]    .spp-val { color: var(--warn-text); }
-  [data-stage="ciclose"] .spp-val { color: var(--accent); }
-  [data-stage="waitsj"]  .spp-val { color: #7C3AED; }
-  [data-stage="total"]   .spp-val { color: var(--hit-text); }
+  [data-stage="wait"]      .spp-val { color: var(--warn-text); }
+  [data-stage="openclose"] .spp-val { color: #F97316; }
+  [data-stage="ciclose"]   .spp-val { color: var(--accent); }
+  [data-stage="waitsj"]    .spp-val { color: #7C3AED; }
+  [data-stage="total"]     .spp-val { color: var(--hit-text); }
 
   .sp-process-title {
     font-size: 10px; font-weight: 800; color: var(--muted);
@@ -1204,6 +1206,11 @@
         <div class="spp-val" id="sppWait">—</div>
         <div class="spp-sub">Check In → Open</div>
       </div>
+      <div class="sp-process-card" data-stage="openclose">
+        <div class="spp-label">Open - Close</div>
+        <div class="spp-val" id="sppOpenClose">—</div>
+        <div class="spp-sub">Open → Close (Durasi Loading)</div>
+      </div>
       <div class="sp-process-card" data-stage="ciclose">
         <div class="spp-label">Check In → Close</div>
         <div class="spp-val" id="sppCiClose">—</div>
@@ -1507,7 +1514,7 @@ function actualCell(timeD, targetD) {
   return `<span class="val-miss">${txt}</span>`;
 }
 
-// Render sel duration proses (informatif, warna netral biru)
+// Render sel durasi proses (informatif, warna netral biru)
 function procCell(ms) {
   if (ms === null || ms === undefined || isNaN(ms)) return '<span style="color:var(--muted)">—</span>';
   return `<span class="dur" style="color:var(--load-text)">${fdurMs(ms)}</span>`;
@@ -1806,14 +1813,16 @@ function renderAll() {
   document.getElementById('spHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('spMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
 
-  // ======== RATA-RATA 4 METRIK PROSES BARU (dari data ter-filter, HANYA EKSTERNAL — selalu, tidak terpengaruh filter Internal/Eksternal) ========
+  // ======== RATA-RATA METRIK PROSES (dari data ter-filter, HANYA EKSTERNAL — selalu, tidak terpengaruh filter Internal/Eksternal) ========
   const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0) / arr.length) : null;
   const externalOnlyData = data.filter(r => !isInternal(r.vendorType));
   const wtlArr = externalOnlyData.filter(r=>r.waitToLoad   !== null).map(r=>r.waitToLoad);
+  const ocArr  = externalOnlyData.filter(r=>r.loadDur      !== null).map(r=>r.loadDur);
   const cicArr = externalOnlyData.filter(r=>r.ciToClose    !== null).map(r=>r.ciToClose);
   const wsjArr = externalOnlyData.filter(r=>r.waitSJ       !== null).map(r=>r.waitSJ);
   const pdcArr = externalOnlyData.filter(r=>r.processingDC !== null).map(r=>r.processingDC);
   document.getElementById('sppWait').textContent      = fdurMs(avg(wtlArr));
+  document.getElementById('sppOpenClose').textContent = fdurMs(avg(ocArr));
   document.getElementById('sppCiClose').textContent   = fdurMs(avg(cicArr));
   document.getElementById('sppWaitSJ').textContent    = fdurMs(avg(wsjArr));
   document.getElementById('sppProcessDC').textContent = fdurMs(avg(pdcArr));
@@ -1836,10 +1845,10 @@ function renderAll() {
     if (r.tloadMs !== null) { m.tgtSum += r.tloadMs; m.tgtN++; }
     if (r.loadHit) { m.hit++; m.hitSum += r.loadDur; m.hitN++; }
     else { m.miss++; m.missSum += r.loadDur; m.missN++; }
-    // akumulasi untuk avg loading
+    // akumulasi untuk avg loading (Open → Close)
     m.loadSum += r.loadDur;
     m.loadN++;
-    // akumulasi 4 metrik proses baru
+    // akumulasi metrik proses lainnya
     if (r.waitToLoad   !== null) { m.wtlSum += r.waitToLoad;   m.wtlN++; }
     if (r.ciToClose    !== null) { m.cicSum += r.ciToClose;    m.cicN++; }
     if (r.waitSJ       !== null) { m.wsjSum += r.waitSJ;       m.wsjN++; }
@@ -1858,7 +1867,7 @@ function renderAll() {
       const avgTgt     = m.tgtN  ? fdurMs(m.tgtSum  / m.tgtN)  : '—';
       const avgHit     = m.hitN  ? fdurMs(m.hitSum  / m.hitN)  : '—';
       const avgMiss    = m.missN ? fdurMs(m.missSum / m.missN) : '—';
-      const avgLoading = m.loadN ? fdurMs(m.loadSum / m.loadN) : '—';
+      const avgLoading = m.loadN ? fdurMs(m.loadSum / m.loadN) : '—'; // Open → Close
       const avgWtl     = m.wtlN  ? fdurMs(m.wtlSum  / m.wtlN)  : '—';
       const avgCic     = m.cicN  ? fdurMs(m.cicSum  / m.cicN)  : '—';
       const avgWsj     = m.wsjN  ? fdurMs(m.wsjSum  / m.wsjN)  : '—';
