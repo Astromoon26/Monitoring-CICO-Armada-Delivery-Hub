@@ -786,6 +786,35 @@
     .last-update { display: none; }
   }
 
+  /* ─── BATCH LOADING (khusus tab On Time Arrive & Checkout) ─────────── */
+  .batch-strip {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+    padding: 14px 18px 4px;
+  }
+  .batch-card {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px; cursor: pointer;
+    border-top: 3px solid var(--bc, var(--accent2));
+    box-shadow: var(--shadow-xs);
+    transition: transform .18s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .batch-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .batch-card.active {
+    box-shadow: 0 0 0 2px var(--bc, var(--accent2)), var(--shadow-md);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F4F8FF 100%);
+  }
+  .bc-name { font-size: 10px; font-weight: 800; color: var(--bc, var(--accent)); text-transform: uppercase; letter-spacing: .4px; }
+  .bc-time { font-size: 9px; color: var(--muted); font-weight: 600; margin-top: 1px; font-family: var(--mono); }
+  .bc-val  { font-family: var(--mono); font-size: 19px; font-weight: 800; color: var(--text); margin-top: 5px; line-height: 1; }
+  .bc-pct  { font-size: 9.5px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .batch-badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap;
+  }
+  @media (max-width: 1100px) { .batch-strip { grid-template-columns: repeat(4,1fr); } }
+  @media (max-width: 640px)  { .batch-strip { grid-template-columns: repeat(2,1fr); padding: 12px 16px 2px; } }
+
   /* ─── LANDING PAGE ─────────────────────────────────────────── */
   #landingPage {
     min-height: 100vh;
@@ -1041,6 +1070,16 @@
   <select id="fSite"   onchange="renderAll()"><option value="">Semua Supply Site</option></select>
   <select id="fTujuan" onchange="renderAll()"><option value="">Semua Tujuan</option></select>
   <select id="fVendor" onchange="renderAll()"><option value="">Semua Vendor</option></select>
+  <select id="fBatch" onchange="renderAll()">
+    <option value="">Semua Batch</option>
+    <option value="Batch 1">Batch 1 (07:00-09:00)</option>
+    <option value="Batch 2">Batch 2 (09:00-12:00)</option>
+    <option value="Batch 3">Batch 3 (12:00-15:00)</option>
+    <option value="Batch 4">Batch 4 (15:00-19:00)</option>
+    <option value="Batch 5">Batch 5 (19:00-22:00)</option>
+    <option value="Batch 6">Batch 6 (22:00-23:59)</option>
+    <option value="Belum Ditentukan">Belum Ditentukan</option>
+  </select>
   <div class="vendor-type-toggle">
     <span class="vt-label">Tipe:</span>
     <div class="vt-chips">
@@ -1260,10 +1299,14 @@
     <!-- TAB 1: ON TIME ARRIVE & CHECKOUT -->
     <div class="tab-pane active" id="t-arrive">
       <div class="tab-panel-desc">Ketepatan Check In &amp; Check Out · Warna hijau = HIT, merah = MISS, kuning = No Target</div>
+
+      <!-- RINGKASAN BATCH LOADING -->
+      <div class="batch-strip" id="batchSummaryGrid"></div>
+
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Req Stuffing</th><th>Target Check In</th><th>Check In Aktual</th>
+          <th>Req Stuffing</th><th>Batch</th><th>Target Check In</th><th>Check In Aktual</th>
           <th>Target Check Out</th><th>Check Out Aktual</th>
         </tr></thead>
         <tbody id="t1"></tbody>
@@ -1346,6 +1389,62 @@ function toggleVendorType(type) {
 function vendorTypeBadge(vendorTypeStr) {
   if (isInternal(vendorTypeStr)) return `<span class="vbadge-internal">INT</span>`;
   return `<span class="vbadge-eksternal">EXT</span>`;
+}
+
+// ─── BATCH LOADING — berdasarkan jam Req Stuffing (kolom I) ───────────
+// Batch 1: 07:00-09:00 | Batch 2: 09:00-12:00 | Batch 3: 12:00-15:00
+// Batch 4: 15:00-19:00 | Batch 5: 19:00-22:00 | Batch 6: 22:00-23:59
+// Di luar rentang itu (00:00-07:00) atau tanpa data Stuffing => "Belum Ditentukan"
+const BATCH_ORDER = ['Batch 1','Batch 2','Batch 3','Batch 4','Batch 5','Batch 6','Belum Ditentukan'];
+const BATCH_TIME = {
+  'Batch 1':'07:00–09:00', 'Batch 2':'09:00–12:00', 'Batch 3':'12:00–15:00',
+  'Batch 4':'15:00–19:00', 'Batch 5':'19:00–22:00', 'Batch 6':'22:00–23:59',
+  'Belum Ditentukan':'00:00–07:00 / tanpa data'
+};
+const BATCH_COLOR = {
+  'Batch 1':'#1D4ED8', 'Batch 2':'#059669', 'Batch 3':'#D97706',
+  'Batch 4':'#7C3AED', 'Batch 5':'#DB2777', 'Batch 6':'#0EA5E9',
+  'Belum Ditentukan':'#94A3B8'
+};
+function getBatch(stuffingDate) {
+  if (!stuffingDate) return 'Belum Ditentukan';
+  const mins = stuffingDate.getHours() * 60 + stuffingDate.getMinutes();
+  if (mins >= 7*60  && mins < 9*60)  return 'Batch 1';
+  if (mins >= 9*60  && mins < 12*60) return 'Batch 2';
+  if (mins >= 12*60 && mins < 15*60) return 'Batch 3';
+  if (mins >= 15*60 && mins < 19*60) return 'Batch 4';
+  if (mins >= 19*60 && mins < 22*60) return 'Batch 5';
+  if (mins >= 22*60 && mins < 24*60) return 'Batch 6';
+  return 'Belum Ditentukan'; // 00:00–07:00
+}
+function batchCell(b) {
+  const c = BATCH_COLOR[b] || '#64748B';
+  return `<span class="batch-badge" style="color:${c};border-color:${c}55;background:${c}14">${b}</span>`;
+}
+function selectBatchFilter(b) {
+  const sel = document.getElementById('fBatch');
+  sel.value = (sel.value === b) ? '' : b;
+  renderAll();
+}
+function renderBatchSummary(data) {
+  const counts = {}; BATCH_ORDER.forEach(b => counts[b] = 0);
+  data.forEach(r => { counts[r.batch] = (counts[r.batch] || 0) + 1; });
+  const total = data.length;
+  const activeBatch = document.getElementById('fBatch').value;
+  const grid = document.getElementById('batchSummaryGrid');
+  grid.innerHTML = BATCH_ORDER.map(b => {
+    const n = counts[b] || 0;
+    const pct = total ? Math.round(n/total*100) : 0;
+    const c = BATCH_COLOR[b];
+    const isActive = activeBatch === b;
+    const safeB = b.replace(/'/g,"\\'");
+    return `<div class="batch-card${isActive?' active':''}" style="--bc:${c}" onclick="selectBatchFilter('${safeB}')" title="Klik untuk filter ${b}">
+      <div class="bc-name">${isActive?'✓ ':''}${b}</div>
+      <div class="bc-time">${BATCH_TIME[b]}</div>
+      <div class="bc-val">${n}</div>
+      <div class="bc-pct">${pct}% dari total</div>
+    </div>`;
+  }).join('');
 }
 
 const selectedSummaryCards = new Set();
@@ -1548,6 +1647,7 @@ async function loadData() {
         nopol:r[4]||'', typeArmada:r[5]||'', tujuan:r[6]||'',
         stuffing, checkin, open, close, checkout, tci, tco,
         tciStr, tcoStr, tloadStr, tloadMs, loadDur, vendorType,
+        batch: getBatch(stuffing),
         ciDelta:(checkin&&tci)?checkin-tci:null,
         coDelta:(checkout&&tco)?checkout-tco:null,
         loadHit:(loadDur!==null&&tloadMs!==null)?loadDur<=tloadMs:null,
@@ -1586,6 +1686,7 @@ function baseFiltered() {
   const site=document.getElementById('fSite').value;
   const tuju=document.getElementById('fTujuan').value;
   const vend=document.getElementById('fVendor').value;
+  const batch=document.getElementById('fBatch').value;
   const tgt=document.getElementById('fTarget').value;
   const df=document.getElementById('fDateFrom').value;
   const dt=document.getElementById('fDateTo').value;
@@ -1593,6 +1694,7 @@ function baseFiltered() {
     if(site&&r.site!==site) return false;
     if(tuju&&r.tujuan!==tuju) return false;
     if(vend&&r.vendor!==vend) return false;
+    if(batch&&r.batch!==batch) return false;
     if(tgt==='ada'   && !(r.tci||r.tco)) return false;
     if(tgt==='tidak' && (r.tci||r.tco))  return false;
     if(df||dt){
@@ -1813,6 +1915,9 @@ function renderAll() {
   document.getElementById('spHit').textContent   = hasTgtLoad.length ? tgtLoadHit  : '—';
   document.getElementById('spMiss').textContent  = hasTgtLoad.length ? tgtLoadMiss : '—';
 
+  // Ringkasan Batch Loading (khusus tab On Time Arrive & Checkout)
+  renderBatchSummary(data);
+
   // ======== RATA-RATA METRIK PROSES (dari data ter-filter, HANYA EKSTERNAL — selalu, tidak terpengaruh filter Internal/Eksternal) ========
   const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0) / arr.length) : null;
   const externalOnlyData = data.filter(r => !isInternal(r.vendorType));
@@ -1976,12 +2081,13 @@ function renderAll() {
       <td>${typeArmadaCell(r.typeArmada)}</td>
       <td>${r.site}</td><td>${r.tujuan}</td>
       <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
+      <td>${batchCell(r.batch)}</td>
       <td><span class="tval">${r.tciStr||'—'}</span></td>
       <td>${actualCell(r.checkin, r.tci)}</td>
       <td><span class="tval">${r.tcoStr||'—'}</span></td>
       <td>${actualCell(r.checkout, r.tco)}</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="11"><div class="empty">Belum ada data Check In / Check Out</div></td></tr>`;
+  }).join('') : `<tr><td colspan="12"><div class="empty">Belum ada data Check In / Check Out</div></td></tr>`;
 
   // PANEL 2: WAITING TO LOAD
   const p2 = data.filter(r=>r.checkin&&!r.open);
