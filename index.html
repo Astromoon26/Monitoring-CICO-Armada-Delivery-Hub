@@ -1279,6 +1279,12 @@
   </div>
 </div>
 
+<!-- RINGKASAN BATCH LOADING -->
+<div class="kpi-section" style="padding-bottom:8px">
+  <div class="kpi-title">Batch Loading <span style="font-size:10px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0">(berdasarkan jam Req Stuffing — klik untuk filter)</span></div>
+  <div class="batch-strip" id="batchSummaryGrid" style="padding:0"></div>
+</div>
+
 <!-- KPI PER TUJUAN -->
 <div class="kpi-section">
   <div class="kpi-title">Performa per Tujuan <span style="font-size:10px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0">(klik untuk filter tujuan — multi-pilih)</span></div>
@@ -1299,10 +1305,6 @@
     <!-- TAB 1: ON TIME ARRIVE & CHECKOUT -->
     <div class="tab-pane active" id="t-arrive">
       <div class="tab-panel-desc">Ketepatan Check In &amp; Check Out · Warna hijau = HIT, merah = MISS, kuning = No Target</div>
-
-      <!-- RINGKASAN BATCH LOADING -->
-      <div class="batch-strip" id="batchSummaryGrid"></div>
-
       <div class="tbl-wrap"><table>
         <thead><tr>
           <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
