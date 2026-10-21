@@ -229,8 +229,8 @@
 
   /* TOP SUMMARY */
   .summary {
-    display: grid; grid-template-columns: repeat(7,1fr);
-    gap: 14px; padding: 18px 28px 22px;
+    display: grid; grid-template-columns: repeat(9,1fr);
+    gap: 8px; padding: 12px 28px 10px;
     background: transparent;
   }
   .s-card {
@@ -765,7 +765,7 @@
     .summary-performa { padding: 14px 16px; }
   }
 
-  @media (max-width: 1400px) { .summary { grid-template-columns: repeat(4,1fr); } }
+  @media (max-width: 1400px) { .summary { grid-template-columns: repeat(5,1fr); } }
   @media (max-width: 1024px) {
     .summary { grid-template-columns: repeat(3,1fr); }
     .header, .filters, .summary, .kpi-section, .tabs-wrap, .summary-filter-bar { padding-left: 20px; padding-right: 20px; }
@@ -1009,6 +1009,29 @@
   body.pov-hub .tab-btn[data-tab="t-load"],
   body.pov-hub .tab-btn[data-tab="t-belum"] { display: none; }
 
+  /* ─── KOMPAK: summary 1 baris + batch strip, supaya 1 screenshot kena semua ─── */
+  .summary .s-card { padding: 9px 10px 8px; border-radius: 12px; gap: 2px; }
+  .summary .s-val { font-size: 21px; }
+  .summary .s-label { font-size: 8.5px; letter-spacing: .6px; }
+  .summary .s-sub { font-size: 9px; }
+  .summary .s-score-hit, .summary .s-score-miss { font-size: 14px; }
+  .summary .s-pct-group { font-size: 9.5px; margin-left: 0; gap: 4px; }
+  .summary .s-bar { margin-top: 5px; height: 3px; }
+  .summary .s-card-click-hint { display: none; }
+  .summary .s-card > div[style*="align-items:baseline"] { margin: 1px 0 !important; }
+  .summary .s-card > div[style*="align-items:baseline"] span:first-child { font-size: 9px !important; }
+  .summary .s-card > div[style*="align-items:baseline"] span:last-child { font-size: 13px !important; }
+  .kpi-section { padding-top: 0; }
+  .batch-strip { gap: 6px; }
+  .batch-card { padding: 6px 10px 7px; border-radius: 10px; }
+  .bc-name { font-size: 9.5px; }
+  .bc-time { font-size: 8.5px; }
+  .bc-val  { font-size: 16px; margin-top: 3px; display: inline-block; }
+  .bc-pct  { font-size: 9px; display: inline-block; margin-left: 6px; }
+  .bc-stats { flex-direction: row; gap: 10px; margin-top: 4px; padding-top: 4px; }
+  .bc-stat { font-size: 9px; }
+  .bc-stat b { font-size: 11px; }
+
   /* ═══════════════════════════════════════════════════════════════
      TAB GABUNGAN: On Time Arrive & Checkout + Performance Loading
      Ukuran diperkecil agar semua kolom muat rapi
@@ -1028,38 +1051,36 @@
   .merge-title::after { order: 3; }
 
   /* panel ringkasan performa ketika berada di dalam tab gabungan */
-  .arrive-perf-slot .summary-performa {
-    padding: 12px 18px 14px; gap: 12px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, #FBFCFE 0%, #FFFFFF 100%);
+  body.tab-arrive-active #slotPerforma .summary-performa {
+    padding: 0 28px 10px; gap: 10px; grid-template-columns: 2.4fr 7.6fr;
   }
-  .arrive-perf-slot .sp-stack { gap: 6px; }
-  .arrive-perf-slot .sp-card { padding: 9px 12px; border-radius: 10px; }
-  .arrive-perf-slot .sp-card.sp-total .sp-val { font-size: 22px; }
-  .arrive-perf-slot .sp-card.sp-hit .sp-val,
-  .arrive-perf-slot .sp-card.sp-miss .sp-val { font-size: 17px; }
-  .arrive-perf-slot .sp-card.sp-hit,
-  .arrive-perf-slot .sp-card.sp-miss { padding: 6px 10px; }
-  .arrive-perf-slot .sp-process-title { margin-top: 2px; font-size: 9.5px; }
-  .arrive-perf-slot .sp-process-strip { gap: 4px; }
-  .arrive-perf-slot .sp-process-card { padding: 5px 10px 5px 12px; border-radius: 8px; }
-  .arrive-perf-slot .sp-process-card .spp-label { font-size: 9px; }
-  .arrive-perf-slot .sp-process-card .spp-val { font-size: 14px; }
-  .arrive-perf-slot .sp-process-card .spp-sub { font-size: 8.5px; margin-top: -3px; }
-  .arrive-perf-slot .sp-card.sp-detail { padding: 10px 12px; }
-  .arrive-perf-slot .sp-detail-head { margin-bottom: 6px; }
-  .arrive-perf-slot .sp-detail-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .arrive-perf-slot .sp-type-chip { padding: 9px 10px; gap: 7px; border-radius: 11px; }
-  .arrive-perf-slot .sp-type-icon { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; }
-  .arrive-perf-slot .sp-type-name { font-size: 11px; }
-  .arrive-perf-slot .sp-type-total-val { font-size: 11.5px; padding: 1px 8px; min-width: 32px; }
-  .arrive-perf-slot .sp-type-hitmiss-row .sp-h,
-  .arrive-perf-slot .sp-type-hitmiss-row .sp-m { font-size: 10px; }
-  .arrive-perf-slot .sp-metric-row { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-  .arrive-perf-slot .sp-metric-tile { padding: 4px 6px 5px; border-radius: 7px; gap: 2px; }
-  .arrive-perf-slot .smt-icon { width: 12px; height: 12px; font-size: 7.5px; border-radius: 4px; }
-  .arrive-perf-slot .sp-metric-tile .smt-label { font-size: 7.5px; }
-  .arrive-perf-slot .sp-metric-tile .smt-val { font-size: 10.5px; }
+  body.tab-arrive-active #slotPerforma .sp-stack { gap: 6px; }
+  body.tab-arrive-active #slotPerforma .sp-card { padding: 9px 12px; border-radius: 10px; }
+  body.tab-arrive-active #slotPerforma .sp-card.sp-total .sp-val { font-size: 22px; }
+  body.tab-arrive-active #slotPerforma .sp-card.sp-hit .sp-val,
+  body.tab-arrive-active #slotPerforma .sp-card.sp-miss .sp-val { font-size: 17px; }
+  body.tab-arrive-active #slotPerforma .sp-card.sp-hit,
+  body.tab-arrive-active #slotPerforma .sp-card.sp-miss { padding: 6px 10px; }
+  body.tab-arrive-active #slotPerforma .sp-process-title { margin-top: 2px; font-size: 9.5px; }
+  body.tab-arrive-active #slotPerforma .sp-process-strip { gap: 4px; }
+  body.tab-arrive-active #slotPerforma .sp-process-card { padding: 5px 10px 5px 12px; border-radius: 8px; }
+  body.tab-arrive-active #slotPerforma .sp-process-card .spp-label { font-size: 9px; }
+  body.tab-arrive-active #slotPerforma .sp-process-card .spp-val { font-size: 14px; }
+  body.tab-arrive-active #slotPerforma .sp-process-card .spp-sub { font-size: 8.5px; margin-top: -3px; }
+  body.tab-arrive-active #slotPerforma .sp-card.sp-detail { padding: 10px 12px; }
+  body.tab-arrive-active #slotPerforma .sp-detail-head { margin-bottom: 6px; }
+  body.tab-arrive-active #slotPerforma .sp-detail-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  body.tab-arrive-active #slotPerforma .sp-type-chip { padding: 9px 10px; gap: 7px; border-radius: 11px; }
+  body.tab-arrive-active #slotPerforma .sp-type-icon { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; }
+  body.tab-arrive-active #slotPerforma .sp-type-name { font-size: 11px; }
+  body.tab-arrive-active #slotPerforma .sp-type-total-val { font-size: 11.5px; padding: 1px 8px; min-width: 32px; }
+  body.tab-arrive-active #slotPerforma .sp-type-hitmiss-row .sp-h,
+  body.tab-arrive-active #slotPerforma .sp-type-hitmiss-row .sp-m { font-size: 10px; }
+  body.tab-arrive-active #slotPerforma .sp-metric-row { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  body.tab-arrive-active #slotPerforma .sp-metric-tile { padding: 4px 6px 5px; border-radius: 7px; gap: 2px; }
+  body.tab-arrive-active #slotPerforma .smt-icon { width: 12px; height: 12px; font-size: 7.5px; border-radius: 4px; }
+  body.tab-arrive-active #slotPerforma .sp-metric-tile .smt-label { font-size: 7.5px; }
+  body.tab-arrive-active #slotPerforma .sp-metric-tile .smt-val { font-size: 10.5px; }
 
   /* tabel gabungan */
   .tbl-merged { border-collapse: separate; border-spacing: 0; width: 100%; }
@@ -1092,11 +1113,11 @@
   .tbl-merged thead tr.sub th { background: linear-gradient(180deg, #F7FAFE 0%, #EEF3FA 100%); }
 
   @media (max-width: 1280px) {
-    .arrive-perf-slot .sp-detail-row { grid-template-columns: repeat(2, 1fr); }
+    body.tab-arrive-active #slotPerforma .sp-detail-row { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 820px) {
-    .arrive-perf-slot .summary-performa { grid-template-columns: 1fr; }
-    .arrive-perf-slot .sp-detail-row { grid-template-columns: 1fr; }
+    body.tab-arrive-active #slotPerforma .summary-performa { grid-template-columns: 1fr; }
+    body.tab-arrive-active #slotPerforma .sp-detail-row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -1346,7 +1367,7 @@
 <!-- SUMMARY KHUSUS PERFORMANCE LOADING
      Dipindah otomatis (lewat switchTab):
        • tab Performance Loading  → slotPerforma (di sini)
-       • tab On Time Arrive & Checkout → slotArrive (di dalam tab) -->
+       • tab On Time Arrive & Checkout → tampil di bawah kartu summary -->
 <div id="slotPerforma">
 <div class="summary-performa" id="summaryPerforma">
   <div class="sp-stack">
@@ -1440,12 +1461,9 @@
 
     <!-- TAB 1: ON TIME ARRIVE & CHECKOUT (sudah digabung dengan Performance Loading) -->
     <div class="tab-pane active" id="t-arrive">
-      <div class="tab-panel-desc">Ketepatan Check In, Loading &amp; Check Out dalam satu tampilan · Hijau = HIT, merah = MISS, kuning = No Target · Kolom Waiting to Load s/d Processing in DC bersifat informatif (tanpa target pembanding)</div>
+      <div class="tab-panel-desc">Ketepatan Check In, Loading &amp; Check Out dalam satu tampilan · Hijau = HIT, merah = MISS, kuning = No Target · Kolom Waiting to Load s/d Processing in DC bersifat informatif (tanpa target pembanding). Ringkasan Performance Loading ada di bagian atas halaman.</div>
 
-      <div class="merge-title">📊 Ringkasan Performance Loading <span class="mt-note">klik type armada untuk filter</span></div>
-      <div class="arrive-perf-slot" id="slotArrive"></div>
-
-      <div class="merge-title" style="padding-top:12px">🚛 Detail LC — Check In · Loading · Check Out</div>
+      <div class="merge-title">🚛 Detail LC — Check In · Loading · Check Out</div>
       <div class="tbl-wrap" style="margin-top:10px"><table class="tbl-merged">
         <thead>
           <tr class="grp">
@@ -2441,9 +2459,9 @@ function renderAll() {
 }
 
 // TABS
-// Panel ringkasan performa (#summaryPerforma) dipindah otomatis:
-//   tab On Time Arrive & Checkout → #slotArrive (di dalam tab)
-//   tab Performance Loading       → #slotPerforma (di atas, menggantikan kartu summary utama)
+// Panel ringkasan performa (#summaryPerforma) selalu di atas:
+//   tab On Time Arrive & Checkout → tampil di bawah 9 kartu summary (kartu tetap tampil)
+//   tab Performance Loading       → tampil menggantikan kartu summary utama (seperti semula)
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2451,10 +2469,6 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   document.body.classList.toggle('tab-performa-active', id === 't-performa');
   document.body.classList.toggle('tab-arrive-active',   id === 't-arrive');
-  const sp = document.getElementById('summaryPerforma');
-  const dest = id === 't-arrive' ? document.getElementById('slotArrive')
-             : document.getElementById('slotPerforma');
-  if (sp && dest && sp.parentNode !== dest) dest.appendChild(sp);
 }
 function clearDateRange() {
   document.getElementById('fDateFrom').value='';
