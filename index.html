@@ -560,11 +560,12 @@
   ::selection { background: rgba(29,78,216,.18); color: var(--text); }
 
 
-  /* PERFORMA SUMMARY (muncul saat tab Performa Loading aktif) */
+  /* PERFORMA SUMMARY (muncul saat tab Performance Loading aktif, dan dipindah ke dalam tab On Time Arrive & Checkout) */
   /* Layout 30:70 — summary kiri, Detail per Type Armada kanan */
   .summary-performa { display: none; grid-template-columns: 3fr 7fr; gap: 18px; padding: 14px 28px 4px; align-items: start; }
   body.tab-performa-active .summary { display: none; }
   body.tab-performa-active .summary-performa { display: grid; animation: fadeUp .35s ease both; }
+  body.tab-arrive-active .summary-performa { display: grid; animation: fadeUp .35s ease both; }
 
   .sp-stack { display: flex; flex-direction: column; gap: 8px; }
   .sp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow-xs); position: relative; }
@@ -1007,6 +1008,96 @@
   body.pov-hub .tab-btn[data-tab="t-wait"],
   body.pov-hub .tab-btn[data-tab="t-load"],
   body.pov-hub .tab-btn[data-tab="t-belum"] { display: none; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TAB GABUNGAN: On Time Arrive & Checkout + Performance Loading
+     Ukuran diperkecil agar semua kolom muat rapi
+     ═══════════════════════════════════════════════════════════════ */
+  .merge-title {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px 0;
+    font-size: 10.5px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .9px;
+  }
+  .merge-title::after { content:''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+  .merge-title .mt-note {
+    order: 2; font-size: 9.5px; font-weight: 700; color: var(--load-text);
+    background: var(--load-bg); border: 1px solid var(--load-border);
+    padding: 2px 8px; border-radius: 999px; text-transform: none; letter-spacing: 0; white-space: nowrap;
+  }
+  .merge-title::after { order: 3; }
+
+  /* panel ringkasan performa ketika berada di dalam tab gabungan */
+  .arrive-perf-slot .summary-performa {
+    padding: 12px 18px 14px; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #FBFCFE 0%, #FFFFFF 100%);
+  }
+  .arrive-perf-slot .sp-stack { gap: 6px; }
+  .arrive-perf-slot .sp-card { padding: 9px 12px; border-radius: 10px; }
+  .arrive-perf-slot .sp-card.sp-total .sp-val { font-size: 22px; }
+  .arrive-perf-slot .sp-card.sp-hit .sp-val,
+  .arrive-perf-slot .sp-card.sp-miss .sp-val { font-size: 17px; }
+  .arrive-perf-slot .sp-card.sp-hit,
+  .arrive-perf-slot .sp-card.sp-miss { padding: 6px 10px; }
+  .arrive-perf-slot .sp-process-title { margin-top: 2px; font-size: 9.5px; }
+  .arrive-perf-slot .sp-process-strip { gap: 4px; }
+  .arrive-perf-slot .sp-process-card { padding: 5px 10px 5px 12px; border-radius: 8px; }
+  .arrive-perf-slot .sp-process-card .spp-label { font-size: 9px; }
+  .arrive-perf-slot .sp-process-card .spp-val { font-size: 14px; }
+  .arrive-perf-slot .sp-process-card .spp-sub { font-size: 8.5px; margin-top: -3px; }
+  .arrive-perf-slot .sp-card.sp-detail { padding: 10px 12px; }
+  .arrive-perf-slot .sp-detail-head { margin-bottom: 6px; }
+  .arrive-perf-slot .sp-detail-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .arrive-perf-slot .sp-type-chip { padding: 9px 10px; gap: 7px; border-radius: 11px; }
+  .arrive-perf-slot .sp-type-icon { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; }
+  .arrive-perf-slot .sp-type-name { font-size: 11px; }
+  .arrive-perf-slot .sp-type-total-val { font-size: 11.5px; padding: 1px 8px; min-width: 32px; }
+  .arrive-perf-slot .sp-type-hitmiss-row .sp-h,
+  .arrive-perf-slot .sp-type-hitmiss-row .sp-m { font-size: 10px; }
+  .arrive-perf-slot .sp-metric-row { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .arrive-perf-slot .sp-metric-tile { padding: 4px 6px 5px; border-radius: 7px; gap: 2px; }
+  .arrive-perf-slot .smt-icon { width: 12px; height: 12px; font-size: 7.5px; border-radius: 4px; }
+  .arrive-perf-slot .sp-metric-tile .smt-label { font-size: 7.5px; }
+  .arrive-perf-slot .sp-metric-tile .smt-val { font-size: 10.5px; }
+
+  /* tabel gabungan */
+  .tbl-merged { border-collapse: separate; border-spacing: 0; width: 100%; }
+  .tbl-merged th, .tbl-merged td { padding: 8px 9px; font-size: 11px; white-space: nowrap; }
+  .tbl-merged th { font-size: 9px; letter-spacing: .6px; position: static; text-align: left; }
+  .tbl-merged thead tr.grp th { text-align: center; padding-top: 7px; padding-bottom: 7px; }
+  .tbl-merged thead tr.grp th[rowspan] { text-align: left; vertical-align: bottom; }
+  .tbl-merged thead tr.sub th { padding-top: 6px; padding-bottom: 6px; }
+  .tbl-merged .lc { font-size: 10.5px; }
+  .tbl-merged .nopol { font-size: 10px; padding: 2px 6px; }
+  .tbl-merged .type-badge { font-size: 9px; padding: 2px 8px; }
+  .tbl-merged .tval, .tbl-merged .val-hit, .tbl-merged .val-miss, .tbl-merged .val-notgt { font-size: 10.5px; }
+  .tbl-merged .dur { font-size: 11px; }
+  .tbl-merged .batch-badge { font-size: 9px; padding: 2px 7px; }
+  .tbl-merged .vbadge-internal, .tbl-merged .vbadge-eksternal { font-size: 8.5px; padding: 1px 6px; }
+  .tbl-merged th:first-child, .tbl-merged td:first-child {
+    padding-left: 14px; position: sticky; left: 0; z-index: 2;
+    box-shadow: 1px 0 0 var(--border);
+  }
+  .tbl-merged th:first-child { z-index: 3; }
+  .tbl-merged tbody td:first-child { background: var(--surface); }
+  .tbl-merged tbody tr:nth-child(even) td:first-child { background: #FBFCFE; }
+  .tbl-merged tbody tr:hover td:first-child { background: #EFF5FF; box-shadow: inset 3px 0 0 var(--accent), 1px 0 0 var(--border); }
+  .tbl-merged th:last-child, .tbl-merged td:last-child { padding-right: 14px; }
+  .tbl-merged .gsep { border-left: 1px solid var(--border); }
+  .tbl-merged thead tr.grp th.g-ci   { background: linear-gradient(180deg, #ECF3FF, #E2ECFD); color: var(--load-text); }
+  .tbl-merged thead tr.grp th.g-load { background: linear-gradient(180deg, #FFF3E3, #FDEBD2); color: var(--warn-text); }
+  .tbl-merged thead tr.grp th.g-co   { background: linear-gradient(180deg, #ECFDF3, #DDF8E8); color: var(--hit-text); }
+  .tbl-merged thead tr.grp th.g-proc { background: linear-gradient(180deg, #F3EEFF, #EADFFD); color: #6D28D9; }
+  .tbl-merged thead tr.sub th { background: linear-gradient(180deg, #F7FAFE 0%, #EEF3FA 100%); }
+
+  @media (max-width: 1280px) {
+    .arrive-perf-slot .sp-detail-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 820px) {
+    .arrive-perf-slot .summary-performa { grid-template-columns: 1fr; }
+    .arrive-perf-slot .sp-detail-row { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -1027,7 +1118,7 @@
       <div class="pov-tagline ndc">National Distribution Center</div>
       <div class="pov-desc">Akses penuh seluruh KPI, performa per tujuan, dan semua status LC secara lengkap.</div>
       <div class="pov-features">
-        <div class="pov-feature"><span class="pov-feature-dot ndc-dot"></span>On Time Arrive &amp; Checkout</div>
+        <div class="pov-feature"><span class="pov-feature-dot ndc-dot"></span>On Time Arrive, Performance Loading &amp; Checkout</div>
         <div class="pov-feature"><span class="pov-feature-dot ndc-dot"></span>Waiting to Load &amp; On Loading</div>
         <div class="pov-feature"><span class="pov-feature-dot ndc-dot"></span>Performance Loading &amp; Belum Datang</div>
         <div class="pov-feature"><span class="pov-feature-dot ndc-dot"></span>KPI lengkap per tujuan</div>
@@ -1252,7 +1343,11 @@
   </div>
 </div>
 
-<!-- SUMMARY KHUSUS TAB PERFORMA LOADING -->
+<!-- SUMMARY KHUSUS PERFORMANCE LOADING
+     Dipindah otomatis (lewat switchTab):
+       • tab Performance Loading  → slotPerforma (di sini)
+       • tab On Time Arrive & Checkout → slotArrive (di dalam tab) -->
+<div id="slotPerforma">
 <div class="summary-performa" id="summaryPerforma">
   <div class="sp-stack">
     <div class="sp-card sp-total">
@@ -1317,6 +1412,7 @@
     </div>
   </div>
 </div>
+</div>
 
 <!-- RINGKASAN BATCH LOADING -->
 <div class="kpi-section" style="padding-bottom:8px">
@@ -1342,15 +1438,31 @@
   </div>
   <div class="tab-content">
 
-    <!-- TAB 1: ON TIME ARRIVE & CHECKOUT -->
+    <!-- TAB 1: ON TIME ARRIVE & CHECKOUT (sudah digabung dengan Performance Loading) -->
     <div class="tab-pane active" id="t-arrive">
-      <div class="tab-panel-desc">Ketepatan Check In &amp; Check Out · Warna hijau = HIT, merah = MISS, kuning = No Target</div>
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th>LC</th><th>Vendor</th><th>Nopol</th><th>Type Armada</th><th>Supply Site</th><th>Tujuan</th>
-          <th>Req Stuffing</th><th>Batch</th><th>Target Check In</th><th>Check In Aktual</th>
-          <th>Target Check Out</th><th>Check Out Aktual</th>
-        </tr></thead>
+      <div class="tab-panel-desc">Ketepatan Check In, Loading &amp; Check Out dalam satu tampilan · Hijau = HIT, merah = MISS, kuning = No Target · Kolom Waiting to Load s/d Processing in DC bersifat informatif (tanpa target pembanding)</div>
+
+      <div class="merge-title">📊 Ringkasan Performance Loading <span class="mt-note">klik type armada untuk filter</span></div>
+      <div class="arrive-perf-slot" id="slotArrive"></div>
+
+      <div class="merge-title" style="padding-top:12px">🚛 Detail LC — Check In · Loading · Check Out</div>
+      <div class="tbl-wrap" style="margin-top:10px"><table class="tbl-merged">
+        <thead>
+          <tr class="grp">
+            <th rowspan="2">LC</th><th rowspan="2">Vendor</th><th rowspan="2">Nopol</th><th rowspan="2">Type Armada</th>
+            <th rowspan="2">Supply Site</th><th rowspan="2">Tujuan</th><th rowspan="2">Req Stuffing</th><th rowspan="2">Batch</th>
+            <th class="g-ci gsep" colspan="2">Check In</th>
+            <th class="g-load gsep" colspan="4">Loading</th>
+            <th class="g-co gsep" colspan="2">Check Out</th>
+            <th class="g-proc gsep" colspan="4">Durasi Proses (Informatif)</th>
+          </tr>
+          <tr class="sub">
+            <th class="gsep">Target</th><th>Aktual</th>
+            <th class="gsep">Open</th><th>Close</th><th>Target Loading</th><th>Durasi Loading</th>
+            <th class="gsep">Target</th><th>Aktual</th>
+            <th class="gsep">Waiting to Load</th><th>CI → Close</th><th>Waiting SJ</th><th>Processing DC</th>
+          </tr>
+        </thead>
         <tbody id="t1"></tbody>
       </table></div>
     </div>
@@ -1379,7 +1491,7 @@
       </table></div>
     </div>
 
-    <!-- TAB 4: PERFORMA LOADING -->
+    <!-- TAB 4: PERFORMA LOADING (tetap ada) -->
     <div class="tab-pane" id="t-performa">
       <div class="tab-panel-desc">Loading selesai — durasi aktual vs Target Loading · Hijau = HIT (≤ target), merah = MISS (&gt; target). 4 kolom terakhir bersifat informatif (tanpa target pembanding).</div>
       <div class="tbl-wrap"><table>
@@ -1679,6 +1791,17 @@ function actualCell(timeD, targetD) {
 function procCell(ms) {
   if (ms === null || ms === undefined || isNaN(ms)) return '<span style="color:var(--muted)">—</span>';
   return `<span class="dur" style="color:var(--load-text)">${fdurMs(ms)}</span>`;
+}
+
+// Sel Durasi Loading (hijau = HIT, merah = MISS, kuning = tanpa target) — dipakai tab gabungan & tab Performance Loading
+function loadDurCell(r) {
+  if (r.loadDur === null) return '<span style="color:var(--muted)">—</span>';
+  if (r.tloadMs === null) return `<span class="dur" style="color:var(--notgt-text)">${fdurMs(r.loadDur)}</span>`;
+  if (r.loadHit)          return `<span class="dur" style="color:var(--hit-text)">${fdurMs(r.loadDur)}</span>`;
+  return `<span class="dur" style="color:var(--miss-text)">${fdurMs(r.loadDur)}</span>`;
+}
+function tloadDisplay(r) {
+  return r.tloadStr ? fdurMs(parseDuration(r.tloadStr)) : '—';
 }
 
 // LOAD
@@ -2192,8 +2315,8 @@ function renderAll() {
 
   const vcell = (r) => `${r.vendor} ${vendorTypeBadge(r.vendorType)}`;
 
-  // PANEL 1: ON TIME ARRIVE & CHECKOUT
-  const p1 = data.filter(r => r.checkin || r.checkout);
+  // PANEL 1: ON TIME ARRIVE & CHECKOUT  (digabung dengan Performance Loading — 20 kolom)
+  const p1 = data.filter(r => r.checkin || r.checkout || r.open || r.close);
   document.getElementById('badge-t-arrive').textContent = p1.length;
   document.getElementById('t1').innerHTML = p1.length ? p1.map(r => {
     return `<tr>
@@ -2204,12 +2327,20 @@ function renderAll() {
       <td>${r.site}</td><td>${r.tujuan}</td>
       <td><span class="tval">${r.stuffing?ft(r.stuffing):'—'}</span></td>
       <td>${batchCell(r.batch)}</td>
-      <td><span class="tval">${r.tciStr||'—'}</span></td>
+      <td class="gsep"><span class="tval">${r.tciStr||'—'}</span></td>
       <td>${actualCell(r.checkin, r.tci)}</td>
-      <td><span class="tval">${r.tcoStr||'—'}</span></td>
+      <td class="gsep"><span class="tval">${r.open?ft(r.open):'—'}</span></td>
+      <td><span class="tval">${r.close?ft(r.close):'—'}</span></td>
+      <td><span class="tval">${tloadDisplay(r)}</span></td>
+      <td>${loadDurCell(r)}</td>
+      <td class="gsep"><span class="tval">${r.tcoStr||'—'}</span></td>
       <td>${actualCell(r.checkout, r.tco)}</td>
+      <td class="gsep">${procCell(r.waitToLoad)}</td>
+      <td>${procCell(r.ciToClose)}</td>
+      <td>${procCell(r.waitSJ)}</td>
+      <td>${procCell(r.processingDC)}</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="12"><div class="empty">Belum ada data Check In / Check Out</div></td></tr>`;
+  }).join('') : `<tr><td colspan="20"><div class="empty">Belum ada data Check In / Loading / Check Out</div></td></tr>`;
 
   // PANEL 2: WAITING TO LOAD
   const p2 = data.filter(r=>r.checkin&&!r.open);
@@ -2247,23 +2378,10 @@ function renderAll() {
     </tr>`;
   }).join('') : `<tr><td colspan="10"><div class="empty">Tidak ada armada yang sedang loading</div></td></tr>`;
 
-  // PANEL 4: PERFORMA LOADING
+  // PANEL 4: PERFORMA LOADING (tetap ada)
   const p4 = data.filter(r=>r.close);
   document.getElementById('badge-t-performa').textContent = p4.length;
   document.getElementById('t4').innerHTML = p4.length ? p4.map(r=>{
-    // Durasi loading colored by hit/miss
-    let durCell;
-    if (r.loadDur === null) {
-      durCell = '<span style="color:var(--muted)">—</span>';
-    } else if (r.tloadMs === null) {
-      // ada durasi tapi tidak ada target → kuning
-      durCell = `<span class="dur" style="color:var(--notgt-text)">${fdurMs(r.loadDur)}</span>`;
-    } else if (r.loadHit) {
-      durCell = `<span class="dur" style="color:var(--hit-text)">${fdurMs(r.loadDur)}</span>`;
-    } else {
-      durCell = `<span class="dur" style="color:var(--miss-text)">${fdurMs(r.loadDur)}</span>`;
-    }
-    const tloadDisplay = r.tloadStr ? fdurMs(parseDuration(r.tloadStr)) : '—';
     return `<tr>
       <td><span class="lc">${r.lc}</span></td>
       <td>${vcell(r)}</td>
@@ -2274,8 +2392,8 @@ function renderAll() {
       <td><span class="tval">${ft(r.open)}</span></td>
       <td><span class="tval">${ft(r.close)}</span></td>
       <td><span class="tval">${ft(r.checkout)}</span></td>
-      <td><span class="tval">${tloadDisplay}</span></td>
-      <td>${durCell}</td>
+      <td><span class="tval">${tloadDisplay(r)}</span></td>
+      <td>${loadDurCell(r)}</td>
       <td>${procCell(r.waitToLoad)}</td>
       <td>${procCell(r.ciToClose)}</td>
       <td>${procCell(r.waitSJ)}</td>
@@ -2323,12 +2441,20 @@ function renderAll() {
 }
 
 // TABS
+// Panel ringkasan performa (#summaryPerforma) dipindah otomatis:
+//   tab On Time Arrive & Checkout → #slotArrive (di dalam tab)
+//   tab Performance Loading       → #slotPerforma (di atas, menggantikan kartu summary utama)
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   document.body.classList.toggle('tab-performa-active', id === 't-performa');
+  document.body.classList.toggle('tab-arrive-active',   id === 't-arrive');
+  const sp = document.getElementById('summaryPerforma');
+  const dest = id === 't-arrive' ? document.getElementById('slotArrive')
+             : document.getElementById('slotPerforma');
+  if (sp && dest && sp.parentNode !== dest) dest.appendChild(sp);
 }
 function clearDateRange() {
   document.getElementById('fDateFrom').value='';
